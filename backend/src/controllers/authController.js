@@ -4,6 +4,18 @@ import crypto from 'crypto';
 
 export async function uaePassLogin(req, res) {
   try {
+    // Demo mode for local testing
+    if (!process.env.UAE_PASS_CLIENT_ID || process.env.UAE_PASS_CLIENT_ID === 'demo_client_id') {
+      const state = crypto.randomBytes(32).toString('hex');
+      // Return a demo URL that goes to our callback with demo params
+      const demoAuthUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/uaepass/callback?code=demo_code_${Date.now()}&state=${state}`;
+      return res.json({
+        authUrl: demoAuthUrl,
+        state,
+        demo: true
+      });
+    }
+
     // Generate state for CSRF protection
     const state = crypto.randomBytes(32).toString('hex');
 
@@ -27,6 +39,33 @@ export async function uaePassCallback(req, res) {
 
     if (!code) {
       return res.status(400).json({ error: 'Authorization code is required' });
+    }
+
+    // Demo mode for local testing
+    if (code.startsWith('demo_code_')) {
+      // Create or get demo user
+      const demoProfile = {
+        sub: 'demo_uaepass_12345',
+        email: 'demo@tali.app',
+        phone_number: '+971501234567',
+        name: 'Demo User',
+      };
+
+      const user = await uaePassService.findOrCreateUser(demoProfile, 'demo_access_token');
+      const { accessToken, refreshToken } = uaePassService.generateJWT(user);
+
+      return res.json({
+        success: true,
+        accessToken,
+        refreshToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.fullName,
+          phoneNumber: user.phoneNumber,
+          preferredLanguage: user.preferredLanguage,
+        }
+      });
     }
 
     // TODO: Verify state for CSRF protection

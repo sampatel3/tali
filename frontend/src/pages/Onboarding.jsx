@@ -15,7 +15,12 @@ const Onboarding = () => {
       // Store state for verification
       localStorage.setItem('uaepass_state', data.state);
 
-      // Redirect to UAE Pass
+      // Show demo mode message
+      if (data.demo) {
+        toast.success('🧪 Demo Mode - Logging you in as a test user');
+      }
+
+      // Redirect to UAE Pass (or demo callback)
       window.location.href = data.authUrl;
     } catch (error) {
       toast.error('Failed to initiate UAE Pass login');
@@ -53,6 +58,13 @@ const Onboarding = () => {
           <div className="text-center text-sm text-gray-500 mt-6">
             <p>Secure authentication via UAE Pass</p>
             <p className="mt-2">No passwords. No hassle.</p>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
+            <p className="text-xs text-blue-800 text-center">
+              🧪 <strong>Demo Mode:</strong> This is running in demo mode for testing. 
+              Real UAE Pass credentials not configured.
+            </p>
           </div>
         </div>
 
