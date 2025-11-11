@@ -71,6 +71,11 @@ export const accountsAPI = {
   delete: (accountId) => api.delete(`/accounts/${accountId}`),
 };
 
+export const transactionsAPI = {
+  getAll: (params) => api.get('/transactions', { params }),
+  getById: (id) => api.get(`/transactions/${id}`),
+};
+
 export const subscriptionsAPI = {
   getAll: (status) => api.get('/subscriptions', { params: { status } }),
   getById: (id) => api.get(`/subscriptions/${id}`),

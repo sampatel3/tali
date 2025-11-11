@@ -7,6 +7,7 @@ const Layout = () => {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
+    { path: '/transactions', label: 'Transactions', icon: '💰' },
     { path: '/subscriptions', label: 'Subscriptions', icon: '💳' },
     { path: '/loyalty', label: 'Loyalty', icon: '🎁' },
     { path: '/analytics', label: 'Analytics', icon: '📈' },

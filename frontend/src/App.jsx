@@ -7,6 +7,7 @@ import { useAuthStore } from './store/authStore';
 import Onboarding from './pages/Onboarding';
 import UAEPassCallback from './pages/UAEPassCallback';
 import Dashboard from './pages/Dashboard';
+import Transactions from './pages/Transactions';
 import Subscriptions from './pages/Subscriptions';
 import SubscriptionDetail from './pages/SubscriptionDetail';
 import Loyalty from './pages/Loyalty';
@@ -41,6 +42,7 @@ function App() {
           >
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="transactions" element={<Transactions />} />
             <Route path="subscriptions" element={<Subscriptions />} />
             <Route path="subscriptions/:id" element={<SubscriptionDetail />} />
             <Route path="loyalty" element={<Loyalty />} />
