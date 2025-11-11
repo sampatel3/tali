@@ -1,24 +1,24 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { useAuthStore } from './store/authStore';
+import { useAuthStore } from './shared/store/authStore';
 
-// Pages
-import Onboarding from './pages/Onboarding';
-import UAEPassCallback from './pages/UAEPassCallback';
-import Dashboard from './pages/Dashboard';
-import Transactions from './pages/Transactions';
-import Subscriptions from './pages/Subscriptions';
-import SubscriptionDetail from './pages/SubscriptionDetail';
-import Loyalty from './pages/Loyalty';
-import LoyaltyDetail from './pages/LoyaltyDetail';
-import Analytics from './pages/Analytics';
-import Settings from './pages/Settings';
-import Upload from './pages/Upload';
+// Pages from features
+import Onboarding from './features/auth/pages/Onboarding';
+import UAEPassCallback from './features/auth/pages/UAEPassCallback';
+import Dashboard from './features/dashboard/pages/Dashboard';
+import Transactions from './features/transactions/pages/Transactions';
+import Subscriptions from './features/subscriptions/pages/Subscriptions';
+import SubscriptionDetail from './features/subscriptions/pages/SubscriptionDetail';
+import Loyalty from './features/loyalty/pages/Loyalty';
+import LoyaltyDetail from './features/loyalty/pages/LoyaltyDetail';
+import Analytics from './features/analytics/pages/Analytics';
+import Settings from './features/settings/pages/Settings';
+import Upload from './features/statements/pages/Upload';
 
-// Components
-import PrivateRoute from './components/PrivateRoute';
-import Layout from './components/Layout';
+// Shared components
+import PrivateRoute from './shared/components/PrivateRoute';
+import Layout from './shared/components/Layout';
 
 function App() {
   const { isAuthenticated } = useAuthStore();

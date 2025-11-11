@@ -3,7 +3,8 @@
  * Starts all Bull queue processors
  */
 
-import './statementProcessor.js';
+// Import all feature workers
+import '../features/statements/workers/statementProcessor.js';
 
 console.log('All workers started successfully');
 console.log('Listening for jobs on:');

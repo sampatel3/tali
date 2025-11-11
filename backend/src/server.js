@@ -11,20 +11,20 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-// Import routes
-import authRoutes from './routes/auth.js';
-import accountRoutes from './routes/accounts.js';
-import transactionRoutes from './routes/transactions.js';
-import subscriptionRoutes from './routes/subscriptions.js';
-import loyaltyRoutes from './routes/loyalty.js';
-import uploadRoutes from './routes/upload.js';
-import analyticsRoutes from './routes/analytics.js';
-import notificationRoutes from './routes/notifications.js';
-import userRoutes from './routes/users.js';
+// Import routes from features
+import authRoutes from './features/auth/routes/auth.js';
+import accountRoutes from './features/banking/routes/accounts.js';
+import transactionRoutes from './features/transactions/routes/transactions.js';
+import subscriptionRoutes from './features/subscriptions/routes/subscriptions.js';
+import loyaltyRoutes from './features/loyalty/routes/loyalty.js';
+import uploadRoutes from './features/statements/routes/upload.js';
+import analyticsRoutes from './features/analytics/routes/analytics.js';
+import notificationRoutes from './features/notifications/routes/notifications.js';
+import userRoutes from './features/users/routes/users.js';
 
-// Import middleware
-import { authenticate } from './middleware/auth.js';
-import { errorHandler } from './middleware/errorHandler.js';
+// Import middleware from shared
+import { authenticate } from './features/auth/middleware/auth.js';
+import { errorHandler } from './shared/middleware/errorHandler.js';
 
 const app = express();
 const prisma = new PrismaClient();
