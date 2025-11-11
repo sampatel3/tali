@@ -13,6 +13,11 @@ pkill -f "uvicorn app:app" && echo "✅ ML Service stopped" || echo "⚠️  ML 
 
 # Stop Backend
 pkill -f "node.*server.js" && echo "✅ Backend stopped" || echo "⚠️  Backend not running"
+
+# Stop Worker
+pkill -f "node.*workers" && echo "✅ Worker stopped" || echo "⚠️  Worker not running"
+
+# Stop Nodemon
 pkill -f "nodemon" && echo "✅ Nodemon stopped" || true
 
 # Stop Frontend

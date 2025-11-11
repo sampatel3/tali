@@ -100,6 +100,7 @@ echo ""
 echo "Cleaning up old processes..."
 pkill -f "uvicorn app:app" 2>/dev/null
 pkill -f "node.*server.js" 2>/dev/null
+pkill -f "node.*workers" 2>/dev/null
 pkill -f "vite" 2>/dev/null
 sleep 2
 
@@ -145,9 +146,19 @@ else
     exit 1
 fi
 
+# Start Worker
+echo ""
+echo "3. Starting Background Worker..."
+cd "$PROJECT_ROOT/backend"
+nohup npm run worker:dev > "$PROJECT_ROOT/logs/worker.log" 2>&1 &
+WORKER_PID=$!
+echo "   PID: $WORKER_PID"
+echo "   ✅ Worker started (processing statements, subscriptions, etc.)"
+sleep 2
+
 # Start Frontend
 echo ""
-echo "3. Starting Frontend..."
+echo "4. Starting Frontend..."
 cd "$PROJECT_ROOT/frontend"
 nohup npm run dev > "$PROJECT_ROOT/logs/frontend.log" 2>&1 &
 FRONTEND_PID=$!
@@ -172,16 +183,19 @@ echo "Service URLs:"
 echo "  Frontend:   http://localhost:5173"
 echo "  Backend:    http://localhost:3000"
 echo "  ML Service: http://localhost:8000"
+echo "  Worker:     Background (processing jobs)"
 echo ""
 echo "Logs:"
 echo "  Backend:    logs/backend.log"
 echo "  Frontend:   logs/frontend.log"
 echo "  ML Service: logs/ml-service.log"
+echo "  Worker:     logs/worker.log"
 echo ""
 echo "To view logs:"
 echo "  tail -f logs/backend.log"
 echo "  tail -f logs/frontend.log"
 echo "  tail -f logs/ml-service.log"
+echo "  tail -f logs/worker.log"
 echo ""
 echo "To stop services:"
 echo "  ./scripts/stop-all.sh"

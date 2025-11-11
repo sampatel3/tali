@@ -109,22 +109,28 @@ model Transaction {
   id                   String       @id @default(uuid())
   userId               String
   bankAccountId        String
+  statementId          String?      // Reference to uploaded statement
 
   // Transaction details
   externalTransactionId String?    @unique // From Nebras/bank
+  transactionHash      String?     @unique // For deduplication
   amount               Decimal     @db.Decimal(15, 2)
   currency             String      @default("AED")
+  type                 String      @default("debit") // debit or credit
+  balance              Decimal?    @db.Decimal(15, 2)
   merchantName         String?     @db.VarChar(255)
   merchantNameRaw      String?     @db.Text
   description          String?     @db.Text
 
   // Categorization
   category             String?     @db.VarChar(100)
+  subcategory          String?     @db.VarChar(100)
   categoryConfidence   Decimal?    @db.Decimal(5, 2)
   externalCategory     Json?       // From banking API
 
   // Dates
-  transactionDate      DateTime
+  date                 DateTime    // Main transaction date
+  transactionDate      DateTime?   // Alternative date field
   postedDate           DateTime?
 
   // Payment info
@@ -150,9 +156,10 @@ model Transaction {
   // Relations
   user                 User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   bankAccount          BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  statement            BankStatement? @relation(fields: [statementId], references: [id], onDelete: SetNull)
   subscription         Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
 
-  @@index([userId, transactionDate(sort: Desc)])
+  @@index([userId, date(sort: Desc)])
   @@index([subscriptionId])
   @@index([merchantName])
 }
@@ -389,7 +396,8 @@ model BankStatement {
   uploadedAt      DateTime @default(now())
 
   // Relations
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
 
   @@index([userId])
   @@index([status])

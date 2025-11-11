@@ -17,29 +17,126 @@ except:
 
 # Known subscription merchants database (UAE/GCC specific)
 KNOWN_MERCHANTS = {
+    # Entertainment - Streaming
     'NETFLIX': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
     'SPOTIFY': {'category': 'entertainment', 'subcategory': 'music', 'frequency': 'monthly'},
     'AMAZON PRIME': {'category': 'shopping', 'subcategory': 'membership', 'frequency': 'monthly'},
+    'OSN': {'category': 'entertainment', 'subcategory': 'tv', 'frequency': 'monthly'},
+    'SHAHID': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
+    'SHAHID VIP': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
+    'ANGHAMI': {'category': 'entertainment', 'subcategory': 'music', 'frequency': 'monthly'},
+    'ANGHAMI PLUS': {'category': 'entertainment', 'subcategory': 'music', 'frequency': 'monthly'},
+    'DISNEY': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
+    'DISNEY PLUS': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
+    'HBO': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
+    'HBO MAX': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
+    'STARZPLAY': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
+    'APPLE MUSIC': {'category': 'entertainment', 'subcategory': 'music', 'frequency': 'monthly'},
+    'YOUTUBE PREMIUM': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
+    'APPLE TV': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
+
+    # Software & Productivity
     'ADOBE': {'category': 'software', 'subcategory': 'creative_tools', 'frequency': 'monthly'},
+    'ADOBE CREATIVE CLOUD': {'category': 'software', 'subcategory': 'creative_tools', 'frequency': 'monthly'},
     'MICROSOFT 365': {'category': 'software', 'subcategory': 'productivity', 'frequency': 'monthly'},
+    'OFFICE 365': {'category': 'software', 'subcategory': 'productivity', 'frequency': 'monthly'},
     'APPLE ICLOUD': {'category': 'software', 'subcategory': 'cloud_storage', 'frequency': 'monthly'},
     'GOOGLE ONE': {'category': 'software', 'subcategory': 'cloud_storage', 'frequency': 'monthly'},
     'DROPBOX': {'category': 'software', 'subcategory': 'cloud_storage', 'frequency': 'monthly'},
-    'GYM': {'category': 'fitness', 'subcategory': 'membership', 'frequency': 'monthly'},
-    'FITNESS FIRST': {'category': 'fitness', 'subcategory': 'gym', 'frequency': 'monthly'},
-    'OSN': {'category': 'entertainment', 'subcategory': 'tv', 'frequency': 'monthly'},
-    'SHAHID': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
-    'ANGHAMI': {'category': 'entertainment', 'subcategory': 'music', 'frequency': 'monthly'},
+    'ZOOM': {'category': 'software', 'subcategory': 'communication', 'frequency': 'monthly'},
+    'CANVA': {'category': 'software', 'subcategory': 'design', 'frequency': 'monthly'},
+    'NOTION': {'category': 'software', 'subcategory': 'productivity', 'frequency': 'monthly'},
+    'EVERNOTE': {'category': 'software', 'subcategory': 'productivity', 'frequency': 'monthly'},
+
+    # UAE Utilities
     'DU': {'category': 'utilities', 'subcategory': 'telecom', 'frequency': 'monthly'},
     'ETISALAT': {'category': 'utilities', 'subcategory': 'telecom', 'frequency': 'monthly'},
+    'VIRGIN MOBILE': {'category': 'utilities', 'subcategory': 'telecom', 'frequency': 'monthly'},
     'DEWA': {'category': 'utilities', 'subcategory': 'electricity', 'frequency': 'monthly'},
     'SEWA': {'category': 'utilities', 'subcategory': 'electricity', 'frequency': 'monthly'},
     'FEWA': {'category': 'utilities', 'subcategory': 'electricity', 'frequency': 'monthly'},
     'ADDC': {'category': 'utilities', 'subcategory': 'electricity', 'frequency': 'monthly'},
-    'DISNEY': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
-    'HBO': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
-    'STARZPLAY': {'category': 'entertainment', 'subcategory': 'video_streaming', 'frequency': 'monthly'},
-    'ZOOM': {'category': 'software', 'subcategory': 'communication', 'frequency': 'monthly'},
+    'AADC': {'category': 'utilities', 'subcategory': 'electricity', 'frequency': 'monthly'},
+    'EMPOWER': {'category': 'utilities', 'subcategory': 'cooling', 'frequency': 'monthly'},
+    'TABREED': {'category': 'utilities', 'subcategory': 'cooling', 'frequency': 'monthly'},
+
+    # Fitness & Gyms (UAE specific)
+    'FITNESS FIRST': {'category': 'fitness', 'subcategory': 'gym', 'frequency': 'monthly'},
+    'GOLD\'S GYM': {'category': 'fitness', 'subcategory': 'gym', 'frequency': 'monthly'},
+    'GYM NATION': {'category': 'fitness', 'subcategory': 'gym', 'frequency': 'monthly'},
+    'FITNESS 360': {'category': 'fitness', 'subcategory': 'gym', 'frequency': 'monthly'},
+    'VOGUE FITNESS': {'category': 'fitness', 'subcategory': 'gym', 'frequency': 'monthly'},
+    'CRANK FITNESS': {'category': 'fitness', 'subcategory': 'gym', 'frequency': 'monthly'},
+    'WAREHOUSE GYM': {'category': 'fitness', 'subcategory': 'gym', 'frequency': 'monthly'},
+    'SPARTAN': {'category': 'fitness', 'subcategory': 'gym', 'frequency': 'monthly'},
+    'CROSSFIT': {'category': 'fitness', 'subcategory': 'gym', 'frequency': 'monthly'},
+    'BARRY\'S': {'category': 'fitness', 'subcategory': 'boutique', 'frequency': 'monthly'},
+    'F45': {'category': 'fitness', 'subcategory': 'boutique', 'frequency': 'monthly'},
+    'ORANGETHEORY': {'category': 'fitness', 'subcategory': 'boutique', 'frequency': 'monthly'},
+    'YOGA': {'category': 'fitness', 'subcategory': 'yoga', 'frequency': 'monthly'},
+    'PILATES': {'category': 'fitness', 'subcategory': 'pilates', 'frequency': 'monthly'},
+
+    # BNPL (Buy Now Pay Later) - UAE popular
+    'TABBY': {'category': 'financial', 'subcategory': 'bnpl', 'frequency': 'monthly'},
+    'POSTPAY': {'category': 'financial', 'subcategory': 'bnpl', 'frequency': 'monthly'},
+    'SPOTII': {'category': 'financial', 'subcategory': 'bnpl', 'frequency': 'monthly'},
+    'TAMARA': {'category': 'financial', 'subcategory': 'bnpl', 'frequency': 'monthly'},
+    'CASHEW': {'category': 'financial', 'subcategory': 'bnpl', 'frequency': 'monthly'},
+
+    # Meal Plans & Food Subscriptions (UAE)
+    'EAT CLEAN ME': {'category': 'food', 'subcategory': 'meal_plan', 'frequency': 'weekly'},
+    'KCAL': {'category': 'food', 'subcategory': 'meal_plan', 'frequency': 'weekly'},
+    'RIGHT BITE': {'category': 'food', 'subcategory': 'meal_plan', 'frequency': 'weekly'},
+    'FITNESS MEALS': {'category': 'food', 'subcategory': 'meal_plan', 'frequency': 'weekly'},
+    'HEALTH FACTORY': {'category': 'food', 'subcategory': 'meal_plan', 'frequency': 'weekly'},
+    'SOUL SANTE': {'category': 'food', 'subcategory': 'meal_plan', 'frequency': 'weekly'},
+    'NUTRITION': {'category': 'food', 'subcategory': 'meal_plan', 'frequency': 'weekly'},
+    'JUST MEAL': {'category': 'food', 'subcategory': 'meal_plan', 'frequency': 'weekly'},
+    'FIT AND FRESH': {'category': 'food', 'subcategory': 'meal_plan', 'frequency': 'weekly'},
+    'MACRO MEALS': {'category': 'food', 'subcategory': 'meal_plan', 'frequency': 'weekly'},
+
+    # Delivery Subscriptions
+    'CAREEM PLUS': {'category': 'shopping', 'subcategory': 'delivery_membership', 'frequency': 'monthly'},
+    'TALABAT PRO': {'category': 'shopping', 'subcategory': 'delivery_membership', 'frequency': 'monthly'},
+    'NOON ONE': {'category': 'shopping', 'subcategory': 'delivery_membership', 'frequency': 'monthly'},
+    'DELIVEROO PLUS': {'category': 'shopping', 'subcategory': 'delivery_membership', 'frequency': 'monthly'},
+
+    # Education & Learning
+    'UDEMY': {'category': 'education', 'subcategory': 'online_courses', 'frequency': 'monthly'},
+    'COURSERA': {'category': 'education', 'subcategory': 'online_courses', 'frequency': 'monthly'},
+    'LINKEDIN LEARNING': {'category': 'education', 'subcategory': 'online_courses', 'frequency': 'monthly'},
+    'SKILLSHARE': {'category': 'education', 'subcategory': 'online_courses', 'frequency': 'monthly'},
+    'MASTERCLASS': {'category': 'education', 'subcategory': 'online_courses', 'frequency': 'monthly'},
+    'DUOLINGO': {'category': 'education', 'subcategory': 'language', 'frequency': 'monthly'},
+
+    # News & Magazines
+    'NEW YORK TIMES': {'category': 'news', 'subcategory': 'newspaper', 'frequency': 'monthly'},
+    'WASHINGTON POST': {'category': 'news', 'subcategory': 'newspaper', 'frequency': 'monthly'},
+    'ECONOMIST': {'category': 'news', 'subcategory': 'magazine', 'frequency': 'monthly'},
+    'BLOOMBERG': {'category': 'news', 'subcategory': 'financial_news', 'frequency': 'monthly'},
+    'FINANCIAL TIMES': {'category': 'news', 'subcategory': 'financial_news', 'frequency': 'monthly'},
+
+    # Gaming
+    'PLAYSTATION': {'category': 'gaming', 'subcategory': 'console', 'frequency': 'monthly'},
+    'XBOX': {'category': 'gaming', 'subcategory': 'console', 'frequency': 'monthly'},
+    'NINTENDO': {'category': 'gaming', 'subcategory': 'console', 'frequency': 'monthly'},
+    'STEAM': {'category': 'gaming', 'subcategory': 'pc_gaming', 'frequency': 'monthly'},
+    'EPIC GAMES': {'category': 'gaming', 'subcategory': 'pc_gaming', 'frequency': 'monthly'},
+
+    # UAE Specific Services
+    'NOOR': {'category': 'finance', 'subcategory': 'investment', 'frequency': 'monthly'},
+    'SARWA': {'category': 'finance', 'subcategory': 'investment', 'frequency': 'monthly'},
+    'INSURANCE': {'category': 'insurance', 'subcategory': 'general', 'frequency': 'monthly'},
+    'PARKING': {'category': 'transportation', 'subcategory': 'parking', 'frequency': 'monthly'},
+    'SALIK': {'category': 'transportation', 'subcategory': 'toll', 'frequency': 'monthly'},
+
+    # Other Popular Subscriptions
+    'AUDIBLE': {'category': 'entertainment', 'subcategory': 'audiobooks', 'frequency': 'monthly'},
+    'KINDLE UNLIMITED': {'category': 'entertainment', 'subcategory': 'ebooks', 'frequency': 'monthly'},
+    'SCRIBD': {'category': 'entertainment', 'subcategory': 'reading', 'frequency': 'monthly'},
+    'MEDIUM': {'category': 'entertainment', 'subcategory': 'reading', 'frequency': 'monthly'},
+    'HEADSPACE': {'category': 'wellness', 'subcategory': 'meditation', 'frequency': 'monthly'},
+    'CALM': {'category': 'wellness', 'subcategory': 'meditation', 'frequency': 'monthly'},
 }
 
 
