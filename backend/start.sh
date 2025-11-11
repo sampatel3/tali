@@ -1,0 +1,21 @@
+#!/bin/bash
+export DATABASE_URL="postgresql://taliuser:talipass123@localhost:5432/tali"
+export REDIS_URL="redis://localhost:6379"
+export REDIS_HOST="localhost"
+export REDIS_PORT="6379"
+export JWT_SECRET="tali-super-secret-jwt-key-for-development-only"
+export JWT_REFRESH_SECRET="tali-super-secret-refresh-key-for-development-only"
+export ENCRYPTION_KEY="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+export NODE_ENV="development"
+export PORT="3000"
+export FRONTEND_URL="http://localhost:5173"
+export API_URL="http://localhost:3000"
+export ML_SERVICE_URL="http://localhost:8000"
+export UAE_PASS_ENV="staging"
+export UAE_PASS_CLIENT_ID="demo_client_id"
+export UAE_PASS_CLIENT_SECRET="demo_client_secret"
+export UAE_PASS_REDIRECT_URI="http://localhost:5173/auth/uaepass/callback"
+export NEBRAS_API_KEY="demo_nebras_api_key"
+export NEBRAS_API_URL="https://api.nebrasfinance.com/v1"
+
+npm run dev
