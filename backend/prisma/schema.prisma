@@ -1,0 +1,469 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// USERS & AUTHENTICATION
+model User {
+  id                 String    @id @default(uuid())
+  email              String?   @unique
+  phoneNumber        String?   @unique
+  fullName           String?
+  uaePassId          String?   @unique
+  passwordHash       String?
+
+  // Profile
+  preferredLanguage  String    @default("en") // 'en' or 'ar'
+  currency           String    @default("AED")
+  timezone           String    @default("Asia/Dubai")
+
+  // Verification
+  emailVerified      Boolean   @default(false)
+  phoneVerified      Boolean   @default(false)
+
+  // Settings
+  notificationPreferences Json  @default("{\"push\": true, \"email\": true, \"sms\": false}")
+
+  // Status
+  status             String    @default("active") // active, suspended, deleted
+
+  // Timestamps
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  lastLoginAt        DateTime?
+
+  // Relations
+  oauthProviders     OAuthProvider[]
+  bankAccounts       BankAccount[]
+  transactions       Transaction[]
+  subscriptions      Subscription[]
+  loyaltyCards       UserLoyaltyCard[]
+  notifications      Notification[]
+  settings           UserSettings?
+  uploadedStatements BankStatement[]
+
+  @@index([email])
+  @@index([uaePassId])
+}
+
+model OAuthProvider {
+  id              String   @id @default(uuid())
+  userId          String
+  provider        String   // 'uae_pass', 'google', 'apple'
+  providerUserId  String
+  accessToken     String?  @db.Text
+  refreshToken    String?  @db.Text
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+}
+
+// BANKING & TRANSACTIONS
+model BankAccount {
+  id                String   @id @default(uuid())
+  userId            String
+
+  // Open Banking (Nebras API)
+  nebrasAccountId   String?  @unique
+  nebrasAccessToken String?  @db.Text // Encrypted
+
+  // Bank details
+  institutionId     String?
+  institutionName   String?
+  accountId         String
+  accountName       String?
+  accountType       String?  // checking, savings, credit
+  accountSubtype    String?
+  mask              String?  // Last 4 digits
+
+  // Balance
+  currentBalance    Decimal?  @db.Decimal(15, 2)
+  availableBalance  Decimal?  @db.Decimal(15, 2)
+  currency          String    @default("AED")
+
+  // Status
+  isActive          Boolean   @default(true)
+  lastSyncedAt      DateTime?
+
+  // Timestamps
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
+
+  @@index([userId])
+  @@index([nebrasAccountId])
+}
+
+model Transaction {
+  id                   String       @id @default(uuid())
+  userId               String
+  bankAccountId        String
+
+  // Transaction details
+  externalTransactionId String?    @unique // From Nebras/bank
+  amount               Decimal     @db.Decimal(15, 2)
+  currency             String      @default("AED")
+  merchantName         String?     @db.VarChar(255)
+  merchantNameRaw      String?     @db.Text
+  description          String?     @db.Text
+
+  // Categorization
+  category             String?     @db.VarChar(100)
+  categoryConfidence   Decimal?    @db.Decimal(5, 2)
+  externalCategory     Json?       // From banking API
+
+  // Dates
+  transactionDate      DateTime
+  postedDate           DateTime?
+
+  // Payment info
+  paymentChannel       String?     // online, in_store, other
+  isPending            Boolean     @default(false)
+
+  // Subscription detection
+  isSubscription       Boolean     @default(false)
+  subscriptionId       String?
+  recurrencePattern    String?     // monthly, yearly, weekly
+
+  // Loyalty linking
+  loyaltyCardId        String?
+  pointsEarned         Decimal?    @db.Decimal(10, 2)
+
+  // Metadata
+  metadata             Json?
+
+  // Timestamps
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  // Relations
+  user                 User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bankAccount          BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  subscription         Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, transactionDate(sort: Desc)])
+  @@index([subscriptionId])
+  @@index([merchantName])
+}
+
+// SUBSCRIPTIONS
+model Subscription {
+  id                   String    @id @default(uuid())
+  userId               String
+  bankAccountId        String?
+
+  // Subscription details
+  merchantName         String    @db.VarChar(255)
+  merchantLogoUrl      String?   @db.Text
+  description          String?   @db.Text
+
+  // Pricing
+  amount               Decimal   @db.Decimal(15, 2)
+  currency             String    @default("AED")
+  billingFrequency     String    // monthly, yearly, weekly, quarterly
+  billingPeriodDays    Int?
+
+  // Dates
+  firstChargeDate      DateTime?
+  lastChargeDate       DateTime?
+  nextChargeDate       DateTime?
+  nextChargeConfidence Decimal?  @db.Decimal(5, 2)
+
+  // Status
+  status               String    @default("active") // active, cancelled, paused, trial
+  isManual             Boolean   @default(false)
+
+  // Categorization
+  category             String?   @db.VarChar(100)
+  subcategory          String?   @db.VarChar(100)
+
+  // Alerts
+  alertEnabled         Boolean   @default(true)
+  alertDaysBefore      Int       @default(1)
+
+  // User notes
+  notes                String?   @db.Text
+  tags                 Json?
+
+  // Detection metadata
+  detectionConfidence  Decimal?  @db.Decimal(5, 2)
+  transactionCount     Int       @default(0)
+
+  // Timestamps
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // Relations
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions         Transaction[]
+
+  @@index([userId, status])
+  @@index([nextChargeDate])
+}
+
+// LOYALTY PROGRAMS
+model LoyaltyProgram {
+  id                      String   @id @default(uuid())
+
+  // Program details
+  name                    String   @db.VarChar(255)
+  nameArabic              String?  @db.VarChar(255)
+  provider                String   @db.VarChar(255)
+  logoUrl                 String?  @db.Text
+
+  // Program type
+  type                    String   // points, cashback, discount, tiered
+  category                String?  // retail, telecom, fuel, dining, entertainment
+
+  // Geographic
+  countries               Json?    // ["UAE", "Saudi", "Kuwait"]
+
+  // Program info
+  websiteUrl              String?  @db.Text
+  appStoreUrl             String?  @db.Text
+  googlePlayUrl           String?  @db.Text
+  description             String?  @db.Text
+  termsUrl                String?  @db.Text
+
+  // Points/rewards
+  pointsCurrency          String?  @db.VarChar(50)
+  pointsToCurrencyRatio   Decimal? @db.Decimal(10, 4)
+  expiryPolicy            String?  @db.Text
+
+  // Metadata
+  isActive                Boolean  @default(true)
+  popularityScore         Int      @default(0)
+
+  // API integration
+  hasApiIntegration       Boolean  @default(false)
+  apiEndpoint             String?  @db.Text
+
+  // Timestamps
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  // Relations
+  userLoyaltyCards        UserLoyaltyCard[]
+  loyaltyOffers           LoyaltyOffer[]
+
+  @@index([category])
+  @@index([isActive])
+}
+
+model UserLoyaltyCard {
+  id                   String    @id @default(uuid())
+  userId               String
+  loyaltyProgramId     String
+
+  // Membership details
+  membershipNumber     String    @db.VarChar(255)
+  memberTier           String?   @db.VarChar(100)
+
+  // Points tracking
+  currentPoints        Decimal   @db.Decimal(15, 2) @default(0)
+  currentBalanceAed    Decimal   @db.Decimal(15, 2) @default(0)
+  pointsEarnedLifetime Decimal   @db.Decimal(15, 2) @default(0)
+  lastSyncedAt         DateTime?
+
+  // Status
+  status               String    @default("active") // active, inactive, expired
+  joinedDate           DateTime?
+  expiryDate           DateTime?
+
+  // Detection
+  isManual             Boolean   @default(false)
+  detectionConfidence  Decimal?  @db.Decimal(5, 2)
+
+  // Alerts
+  alertOnPointsExpiry  Boolean   @default(true)
+  alertOnTierDowngrade Boolean   @default(true)
+
+  // Notes
+  notes                String?   @db.Text
+
+  // Timestamps
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // Relations
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  loyaltyProgram       LoyaltyProgram   @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
+  transactions         LoyaltyTransaction[]
+
+  @@unique([userId, loyaltyProgramId, membershipNumber])
+  @@index([userId])
+  @@index([loyaltyProgramId])
+}
+
+model LoyaltyTransaction {
+  id                   String    @id @default(uuid())
+  userLoyaltyCardId    String
+  transactionId        String?   // Link to bank transaction
+
+  // Transaction details
+  merchantName         String?   @db.VarChar(255)
+  amount               Decimal?  @db.Decimal(15, 2)
+  currency             String    @default("AED")
+  transactionDate      DateTime
+
+  // Points
+  pointsEarned         Decimal?  @db.Decimal(15, 2)
+  pointsRedeemed       Decimal?  @db.Decimal(15, 2)
+  pointsBalanceAfter   Decimal?  @db.Decimal(15, 2)
+
+  // Type
+  transactionType      String    // earned, redeemed, expired, adjusted
+  description          String?   @db.Text
+
+  // Timestamps
+  createdAt            DateTime  @default(now())
+
+  // Relations
+  userLoyaltyCard      UserLoyaltyCard @relation(fields: [userLoyaltyCardId], references: [id], onDelete: Cascade)
+
+  @@index([userLoyaltyCardId])
+  @@index([transactionDate(sort: Desc)])
+}
+
+model LoyaltyOffer {
+  id                String    @id @default(uuid())
+  loyaltyProgramId  String
+
+  // Offer details
+  title             String    @db.VarChar(255)
+  description       String?   @db.Text
+  offerType         String    // bonus_points, discount, free_item, tier_upgrade
+
+  // Validity
+  startDate         DateTime?
+  endDate           DateTime?
+  isActive          Boolean   @default(true)
+
+  // Targeting
+  requiredTier      String?   @db.VarChar(100)
+  minSpend          Decimal?  @db.Decimal(15, 2)
+
+  // Timestamps
+  createdAt         DateTime  @default(now())
+
+  // Relations
+  loyaltyProgram    LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id], onDelete: Cascade)
+
+  @@index([loyaltyProgramId, isActive])
+}
+
+// BANK STATEMENT UPLOADS
+model BankStatement {
+  id              String   @id @default(uuid())
+  userId          String
+
+  // File details
+  filename        String
+  filepath        String   @db.Text
+  filesize        Int
+  mimeType        String
+
+  // Processing
+  status          String   @default("pending") // pending, processing, completed, failed
+  processedAt     DateTime?
+  errorMessage    String?  @db.Text
+
+  // Extracted data
+  accountNumber   String?
+  bankName        String?
+  statementPeriod String?
+  transactionCount Int     @default(0)
+
+  // Timestamps
+  uploadedAt      DateTime @default(now())
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+// NOTIFICATIONS
+model Notification {
+  id              String    @id @default(uuid())
+  userId          String
+  subscriptionId  String?
+
+  // Notification details
+  type            String    // upcoming_charge, charge_failed, new_subscription, loyalty_expiry
+  title           String    @db.VarChar(255)
+  body            String    @db.Text
+  data            Json?
+
+  // Status
+  isRead          Boolean   @default(false)
+  sentAt          DateTime?
+  readAt          DateTime?
+
+  // Timestamps
+  createdAt       DateTime  @default(now())
+
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}
+
+// USER SETTINGS
+model UserSettings {
+  userId                 String   @id
+
+  // Notification preferences
+  pushNotifications      Boolean  @default(true)
+  emailNotifications     Boolean  @default(true)
+  smsNotifications       Boolean  @default(false)
+  notificationTime       String   @default("09:00")
+
+  // Display preferences
+  theme                  String   @default("light") // light, dark, auto
+  currencyFormat         String   @default("en-AE")
+  dateFormat             String   @default("DD/MM/YYYY")
+
+  // Privacy
+  analyticsEnabled       Boolean  @default(true)
+  crashReportingEnabled  Boolean  @default(true)
+
+  // Budget (Phase 2)
+  monthlyBudget          Decimal? @db.Decimal(15, 2)
+  budgetAlertThreshold   Decimal  @default(0.80) @db.Decimal(5, 2)
+
+  // Timestamps
+  updatedAt              DateTime @updatedAt
+
+  // Relations
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// CATEGORIES (Predefined + Custom)
+model Category {
+  id              String    @id @default(uuid())
+  name            String    @db.VarChar(100)
+  icon            String?   @db.VarChar(50)
+  color           String?   @db.VarChar(7)
+  parentCategoryId String?
+  isSystem        Boolean   @default(true)
+  userId          String?
+
+  // Timestamps
+  createdAt       DateTime  @default(now())
+
+  @@index([isSystem])
+  @@index([userId])
+}

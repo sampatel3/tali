@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: tali-postgres
+    environment:
+      POSTGRES_DB: tali
+      POSTGRES_USER: taliuser
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-talipass123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taliuser -d tali"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tali-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: tali-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tali-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tali-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://taliuser:${DB_PASSWORD:-talipass123}@postgres:5432/tali
+      - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-in-production}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      - FRONTEND_URL=http://localhost:5173
+      - API_URL=http://localhost:3000
+      - ML_SERVICE_URL=http://ml-service:8000
+      - UAE_PASS_CLIENT_ID=${UAE_PASS_CLIENT_ID:-}
+      - UAE_PASS_CLIENT_SECRET=${UAE_PASS_CLIENT_SECRET:-}
+      - UAE_PASS_REDIRECT_URI=${UAE_PASS_REDIRECT_URI:-http://localhost:5173/auth/uaepass/callback}
+      - UAE_PASS_ENV=staging
+      - NEBRAS_API_KEY=${NEBRAS_API_KEY:-}
+      - NEBRAS_API_URL=${NEBRAS_API_URL:-https://api.nebrasfinance.com/v1}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./backend/uploads:/app/uploads
+    command: npm run dev
+    networks:
+      - tali-network
+
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: tali-ml-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ml-service:/app
+      - ./ml-service/models:/app/models
+    networks:
+      - tali-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: tali-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000/api/v1
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev
+    networks:
+      - tali-network
+
+networks:
+  tali-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
