@@ -40,17 +40,27 @@ statementProcessingQueue.process(async (job) => {
     }
 
     if (parseResult.totalCount === 0) {
-      // Update status but don't fail completely - user can still see the statement
+      // Log detailed information for debugging
+      console.warn(`No transactions found in statement ${statementId}`, {
+        bankName: parseResult.bankName,
+        mimeType,
+        filepath,
+      });
+      
+      // Update status with helpful message
       await prisma.bankStatement.update({
         where: { id: statementId },
         data: {
           status: 'completed',
           transactionCount: 0,
-          errorMessage: 'No transactions found in statement. PDF parsing may need manual review.',
+          errorMessage: mimeType === 'application/pdf' 
+            ? `No transactions extracted from PDF. Bank detected: ${parseResult.bankName}. Please verify the PDF format or try uploading as CSV.`
+            : 'No transactions found in statement. Please verify the file format.',
         },
       });
-      console.warn(`No transactions found in statement ${statementId}`);
-      return; // Exit early but don't throw error
+      
+      // Don't throw error - allow user to see the statement and try again
+      return;
     }
 
     // Get or create bank account
