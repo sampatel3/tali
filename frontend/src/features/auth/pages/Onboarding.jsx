@@ -2,6 +2,18 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../../../shared/services/api';
 import toast from 'react-hot-toast';
+import {
+  Sparkles,
+  Bot,
+  PiggyBank,
+  Gift,
+  BarChart3,
+  Shield,
+  CheckCircle2,
+  Flag,
+  Loader2,
+  Check
+} from 'lucide-react';
 
 const Onboarding = () => {
   const [loading, setLoading] = useState(false);
@@ -17,7 +29,7 @@ const Onboarding = () => {
 
       // Show demo mode message
       if (data.demo) {
-        toast.success('🧪 Demo Mode - Logging you in as a test user');
+        toast.success('Demo Mode - Logging you in as a test user');
       }
 
       // Redirect to UAE Pass (or demo callback)
@@ -30,22 +42,22 @@ const Onboarding = () => {
 
   const features = [
     {
-      icon: '🤖',
+      icon: Bot,
       title: 'AI-Powered Detection',
       description: 'Automatically detect 100+ UAE subscriptions from your bank statements'
     },
     {
-      icon: '💰',
+      icon: PiggyBank,
       title: 'Save Money',
       description: 'Track BNPL, meal plans, gyms, and utilities - save AED 500+/month'
     },
     {
-      icon: '🎁',
+      icon: Gift,
       title: 'Loyalty Rewards',
       description: 'Never miss SHARE, Shukran, Smiles, Skywards points again'
     },
     {
-      icon: '📊',
+      icon: BarChart3,
       title: 'Smart Analytics',
       description: 'Get insights on spending patterns and upcoming charges'
     }
@@ -66,7 +78,7 @@ const Onboarding = () => {
             {/* Logo */}
             <div className="flex items-center gap-4 mb-8">
               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl">
-                <span className="text-4xl font-bold gradient-text">T</span>
+                <Sparkles className="w-8 h-8 text-primary-600" strokeWidth={2.5} />
               </div>
               <div>
                 <h1 className="text-5xl font-bold">TALI</h1>
@@ -100,16 +112,21 @@ const Onboarding = () => {
 
             {/* Feature Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12">
-              {features.map((feature, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300"
-                >
-                  <span className="text-3xl mb-2 block">{feature.icon}</span>
-                  <h3 className="font-semibold text-lg mb-1">{feature.title}</h3>
-                  <p className="text-sm opacity-80">{feature.description}</p>
-                </div>
-              ))}
+              {features.map((feature, idx) => {
+                const IconComponent = feature.icon;
+                return (
+                  <div
+                    key={idx}
+                    className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300"
+                  >
+                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-3">
+                      <IconComponent className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-1">{feature.title}</h3>
+                    <p className="text-sm opacity-80">{feature.description}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -132,28 +149,30 @@ const Onboarding = () => {
               <button
                 onClick={handleUAEPassLogin}
                 disabled={loading}
-                className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-3 mb-6"
+                className="w-full bg-primary-600 hover:bg-primary-700 text-white py-4 text-lg rounded-lg flex items-center justify-center gap-3 mb-6 transition-colors disabled:opacity-50"
               >
                 {loading ? (
                   <>
-                    <div className="w-6 h-6 spinner"></div>
+                    <Loader2 className="w-5 h-5 animate-spin" />
                     <span>Connecting...</span>
                   </>
                 ) : (
                   <>
-                    <span className="text-2xl">🇦🇪</span>
+                    <Flag className="w-5 h-5" />
                     <span>Sign in with UAE Pass</span>
                   </>
                 )}
               </button>
 
               {/* Demo Mode Alert */}
-              <div className="alert alert-info mb-6">
-                <div className="flex items-start gap-2">
-                  <span className="text-lg">🧪</span>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Shield className="w-3 h-3 text-blue-600" />
+                  </div>
                   <div>
-                    <p className="font-semibold text-sm">Demo Mode Active</p>
-                    <p className="text-xs mt-1 opacity-80">
+                    <p className="font-semibold text-sm text-blue-900">Demo Mode Active</p>
+                    <p className="text-xs mt-1 text-blue-700">
                       Running in test mode. Real UAE Pass credentials not configured yet.
                     </p>
                   </div>
@@ -163,15 +182,15 @@ const Onboarding = () => {
               {/* Security Info */}
               <div className="text-center text-sm text-gray-500 space-y-2">
                 <p className="flex items-center justify-center gap-2">
-                  <span>🔒</span>
+                  <Shield className="w-4 h-4 text-gray-600" />
                   <span>Bank-level security & encryption</span>
                 </p>
                 <p className="flex items-center justify-center gap-2">
-                  <span>✅</span>
+                  <CheckCircle2 className="w-4 h-4 text-gray-600" />
                   <span>No passwords stored</span>
                 </p>
                 <p className="flex items-center justify-center gap-2">
-                  <span>🇦🇪</span>
+                  <Flag className="w-4 h-4 text-gray-600" />
                   <span>UAE Data Residency compliant</span>
                 </p>
               </div>
@@ -184,25 +203,25 @@ const Onboarding = () => {
                 <p className="text-sm font-semibold text-gray-700 mb-3">What you'll get:</p>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-success-100 rounded-lg flex items-center justify-center">
-                    <span>✓</span>
+                    <Check className="w-5 h-5 text-success-600" />
                   </div>
                   <p className="text-sm text-gray-700">Auto-detect all subscriptions</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-success-100 rounded-lg flex items-center justify-center">
-                    <span>✓</span>
+                    <Check className="w-5 h-5 text-success-600" />
                   </div>
                   <p className="text-sm text-gray-700">Track DEWA, Salik, school fees</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-success-100 rounded-lg flex items-center justify-center">
-                    <span>✓</span>
+                    <Check className="w-5 h-5 text-success-600" />
                   </div>
                   <p className="text-sm text-gray-700">Manage loyalty programs</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-success-100 rounded-lg flex items-center justify-center">
-                    <span>✓</span>
+                    <Check className="w-5 h-5 text-success-600" />
                   </div>
                   <p className="text-sm text-gray-700">AI-powered savings insights</p>
                 </div>
