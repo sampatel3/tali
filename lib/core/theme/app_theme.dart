@@ -1,23 +1,38 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Colors - matching the React app's wio.io-inspired design
-  static const Color primary = Color(0xFF6366F1); // Indigo
-  static const Color primaryDark = Color(0xFF4F46E5);
-  static const Color secondary = Color(0xFF8B5CF6); // Purple
-  static const Color accent = Color(0xFF10B981); // Green
-  static const Color error = Color(0xFFEF4444);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color info = Color(0xFF3B82F6);
-  static const Color success = Color(0xFF10B981);
+  // Modern Fintech Color Palette 2025
+  // Deep teal/cyan with vibrant accents for a fresh, professional look
+  static const Color primary = Color(0xFF0891B2); // Cyan 600 - Professional teal
+  static const Color primaryDark = Color(0xFF0E7490); // Cyan 700
+  static const Color primaryLight = Color(0xFF06B6D4); // Cyan 500
+  static const Color secondary = Color(0xFFEC4899); // Pink 500 - Vibrant accent
+  static const Color accent = Color(0xFF8B5CF6); // Purple 500 - Secondary accent
 
-  static const Color background = Color(0xFFF9FAFB);
+  static const Color success = Color(0xFF059669); // Emerald 600
+  static const Color error = Color(0xFFDC2626); // Red 600
+  static const Color warning = Color(0xFFF59E0B); // Amber 500
+  static const Color info = Color(0xFF0284C7); // Sky 600
+
+  static const Color background = Color(0xFFFAFAFA);
   static const Color surface = Colors.white;
-  static const Color surfaceDark = Color(0xFF1F2937);
+  static const Color surfaceDark = Color(0xFF1E293B); // Slate 800
 
-  static const Color textPrimary = Color(0xFF111827);
-  static const Color textSecondary = Color(0xFF6B7280);
-  static const Color textHint = Color(0xFF9CA3AF);
+  static const Color textPrimary = Color(0xFF0F172A); // Slate 900
+  static const Color textSecondary = Color(0xFF64748B); // Slate 500
+  static const Color textHint = Color(0xFF94A3B8); // Slate 400
+
+  // Gradient colors for modern UI
+  static const List<Color> primaryGradient = [
+    Color(0xFF06B6D4), // Cyan 500
+    Color(0xFF0891B2), // Cyan 600
+    Color(0xFF0E7490), // Cyan 700
+  ];
+
+  static const List<Color> accentGradient = [
+    Color(0xFFEC4899), // Pink 500
+    Color(0xFF8B5CF6), // Purple 500
+  ];
 
   // Light Theme
   static ThemeData lightTheme = ThemeData(

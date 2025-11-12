@@ -5,6 +5,10 @@ import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/subscriptions/screens/subscriptions_screen.dart';
 import '../../features/subscriptions/screens/subscription_detail_screen.dart';
 import '../../features/transactions/screens/transactions_screen.dart';
+import '../../features/settings/screens/settings_screen.dart';
+import '../../features/settings/screens/uae_services_screen.dart';
+import '../../features/settings/screens/bank_accounts_screen.dart';
+import '../../features/settings/screens/upload_statement_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -51,6 +55,28 @@ class AppRouter {
         path: '/transactions',
         name: 'transactions',
         builder: (context, state) => const TransactionsScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsScreen(),
+        routes: [
+          GoRoute(
+            path: 'uae-services',
+            name: 'uae-services',
+            builder: (context, state) => const UAEServicesScreen(),
+          ),
+          GoRoute(
+            path: 'bank-accounts',
+            name: 'bank-accounts',
+            builder: (context, state) => const BankAccountsScreen(),
+          ),
+          GoRoute(
+            path: 'upload-statement',
+            name: 'upload-statement',
+            builder: (context, state) => const UploadStatementScreen(),
+          ),
+        ],
       ),
     ],
   );

@@ -34,10 +34,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primary,
-              AppTheme.secondary,
-            ],
+            colors: AppTheme.primaryGradient,
+            stops: const [0.0, 0.5, 1.0],
           ),
         ),
         child: SafeArea(
@@ -52,42 +50,67 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 20),
-                    // Logo and Title
-                    Icon(
-                      Icons.account_balance_wallet,
-                      size: 80,
-                      color: Colors.white,
+                    const SizedBox(height: 40),
+                    // Logo and Title with modern design
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.account_balance_wallet_rounded,
+                        size: 64,
+                        color: Colors.white,
+                      ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                     const Text(
                       'TALI',
                       style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 56,
+                        fontWeight: FontWeight.w900,
                         color: Colors.white,
+                        letterSpacing: 2,
                       ),
                       textAlign: TextAlign.center,
                     ),
+                    const SizedBox(height: 8),
                     const Text(
                       'تالي',
                       style: TextStyle(
-                        fontSize: 36,
+                        fontSize: 32,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white70,
+                        color: Colors.white,
+                        letterSpacing: 1,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Manage Subscriptions & Loyalty Programs',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(24),
                       ),
-                      textAlign: TextAlign.center,
+                      child: const Text(
+                        'Smart Subscription & Loyalty Management',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 48),
                     // Features
                     _buildFeature(
                       icon: Icons.credit_card,
@@ -118,73 +141,127 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
-                            // Username/Password Login Button - FIRST BUTTON
-                            ElevatedButton(
-                              onPressed: authProvider.status == AuthStatus.loading
-                                  ? null
-                                  : () {
-                                      setState(() {
-                                        _showLoginForm = true;
-                                      });
-                                    },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: AppTheme.primary,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                minimumSize: const Size(double.infinity, 50),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Icon(Icons.person, color: AppTheme.primary),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Login with Username',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppTheme.primary,
-                                    ),
+                            // Username/Password Login Button - Modern design
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                gradient: const LinearGradient(
+                                  colors: [Colors.white, Color(0xFFF0F9FF)],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 6),
                                   ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            // UAE Pass Login Button - SECOND BUTTON
-                            OutlinedButton(
-                              onPressed: authProvider.status == AuthStatus.loading
-                                  ? null
-                                  : () => _handleUAEPassLogin(context, authProvider),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                side: const BorderSide(color: Colors.white, width: 2),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                minimumSize: const Size(double.infinity, 50),
-                              ),
-                              child: authProvider.status == AuthStatus.loading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
+                              child: ElevatedButton(
+                                onPressed: authProvider.status == AuthStatus.loading
+                                    ? null
+                                    : () {
+                                        setState(() {
+                                          _showLoginForm = true;
+                                        });
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  foregroundColor: AppTheme.primary,
+                                  shadowColor: Colors.transparent,
+                                  padding: const EdgeInsets.symmetric(vertical: 18),
+                                  minimumSize: const Size(double.infinity, 56),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primary.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                    )
-                                  : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: const <Widget>[
-                                        Icon(Icons.fingerprint, color: Colors.white),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Login with UAE Pass',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
+                                      child: Icon(Icons.person_rounded, color: AppTheme.primary, size: 20),
                                     ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Login with Username',
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.primary,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // UAE Pass Login Button - Modern design
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.4),
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: OutlinedButton(
+                                onPressed: authProvider.status == AuthStatus.loading
+                                    ? null
+                                    : () => _handleUAEPassLogin(context, authProvider),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  side: BorderSide.none,
+                                  padding: const EdgeInsets.symmetric(vertical: 18),
+                                  minimumSize: const Size(double.infinity, 56),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: authProvider.status == AuthStatus.loading
+                                    ? const SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withValues(alpha: 0.2),
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: const Icon(Icons.fingerprint_rounded, color: Colors.white, size: 20),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          const Text(
+                                            'Login with UAE Pass',
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
                             ),
                           ],
                         );
@@ -207,14 +284,32 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     required String description,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: <Widget>[
-          Icon(icon, color: Colors.white, size: 32),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.white, size: 28),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -224,16 +319,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   title,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   description,
-                  style: const TextStyle(
-                    color: Colors.white70,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 14,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -246,10 +343,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildLoginForm(BuildContext context, AuthProvider authProvider) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 30,
+            spreadRadius: 5,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
