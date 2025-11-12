@@ -1,4 +1,5 @@
 import { parse, parseISO, isValid } from 'date-fns';
+import crypto from 'crypto';
 
 /**
  * Parse date from various formats used by UAE banks
@@ -184,7 +185,6 @@ export function categorizeTransaction(merchantName, amount, description) {
  * Generate unique hash for transaction (for deduplication)
  */
 export function generateTransactionHash(date, merchantName, amount) {
-  const crypto = require('crypto');
   const data = `${date.toISOString()}_${merchantName}_${amount}`;
   return crypto.createHash('md5').update(data).digest('hex');
 }
