@@ -42,7 +42,9 @@ Then open: **http://localhost:5173**
 Once running, you can:
 
 1. **Open the app**: http://localhost:5173
-2. **Login with UAE Pass**: Click "Login with UAE Pass" (Demo mode enabled)
+2. **Login Options**:
+   - **Username/Password**: Click "Login with Username" → Enter `demo` / `demo`
+   - **UAE Pass**: Click "Login with UAE Pass" (Demo mode enabled)
 3. **Explore features**:
    - Dashboard
    - Subscriptions

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../subscriptions/providers/subscription_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -34,9 +35,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {},
           ),
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () {},
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, _) {
+              return PopupMenuButton<String>(
+                icon: const Icon(Icons.account_circle_outlined),
+                onSelected: (value) async {
+                  if (value == 'logout') {
+                    await authProvider.logout();
+                    if (context.mounted) {
+                      context.go('/');
+                    }
+                  } else if (value == 'settings') {
+                    // Navigate to settings when implemented
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Settings coming soon!')),
+                    );
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'settings',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.settings, size: 20),
+                        SizedBox(width: 8),
+                        Text('Settings'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem(
+                    value: 'logout',
+                    child: Row(
+                      children: const [
+                        Icon(Icons.logout, size: 20, color: AppTheme.error),
+                        SizedBox(width: 8),
+                        Text(
+                          'Logout',
+                          style: TextStyle(color: AppTheme.error),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

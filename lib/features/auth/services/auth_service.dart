@@ -8,6 +8,42 @@ class AuthService {
   final ApiClient _apiClient = ApiClient();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
+  // Login with username and password
+  Future<UserModel> login(String username, String password) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConfig.login,
+        data: {
+          'username': username,
+          'password': password,
+        },
+      );
+
+      final data = response.data as Map<String, dynamic>;
+
+      // Store tokens
+      await _storage.write(
+        key: AppConstants.keyAccessToken,
+        value: data['accessToken'],
+      );
+      await _storage.write(
+        key: AppConstants.keyRefreshToken,
+        value: data['refreshToken'],
+      );
+
+      // Store user info
+      final user = UserModel.fromJson(data['user']);
+      await _storage.write(key: AppConstants.keyUserId, value: user.id);
+      await _storage.write(key: AppConstants.keyUserEmail, value: user.email);
+      await _storage.write(
+          key: AppConstants.keyUserName, value: user.fullName ?? '');
+
+      return user;
+    } catch (e) {
+      throw Exception('Failed to login: $e');
+    }
+  }
+
   // Initiate UAE Pass login
   Future<Map<String, dynamic>> initiateUAEPassLogin() async {
     try {

@@ -42,8 +42,27 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // Login with username and password
+  Future<bool> login(String username, String password) async {
+    try {
+      _status = AuthStatus.loading;
+      _error = null;
+      notifyListeners();
+
+      _user = await _authService.login(username, password);
+      _status = AuthStatus.authenticated;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _status = AuthStatus.unauthenticated;
+      notifyListeners();
+      return false;
+    }
+  }
+
   // Initiate UAE Pass login
-  Future<String?> initiateLogin() async {
+  Future<String?> initiateUAEPassLogin() async {
     try {
       _status = AuthStatus.loading;
       _error = null;

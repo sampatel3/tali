@@ -1,1 +1,0 @@
-{"inputs":["/home/user/tali/web/*/index.html","/home/user/tali/web/flutter_bootstrap.js","/tmp/flutter/bin/cache/engine.stamp"],"outputs":["/home/user/tali/build/web/*/index.html","/home/user/tali/build/web/flutter_bootstrap.js"],"buildKey":"[{\"compileTarget\":\"dart2js\",\"renderer\":\"canvaskit\",\"mainJsPath\":\"main.dart.js\"},{}]"}

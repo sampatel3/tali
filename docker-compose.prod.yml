@@ -108,13 +108,15 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.flutter
+      args:
+        - API_URL=${API_URL:-http://localhost:3000/api/v1}
     container_name: tali-frontend-prod
     ports:
       - "80:80"
     environment:
-      - VITE_API_URL=${API_URL}/api/v1
+      - API_URL=${API_URL}
     networks:
       - tali-network
     restart: unless-stopped

@@ -1,11 +1,13 @@
 import * as uaePassService from '../services/uaePassService.js';
 import { prisma } from '../../../server.js';
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 
 export async function uaePassLogin(req, res) {
   try {
     // Demo mode for local testing
-    if (!process.env.UAE_PASS_CLIENT_ID || process.env.UAE_PASS_CLIENT_ID === 'demo_client_id') {
+    const clientId = process.env.UAE_PASS_CLIENT_ID;
+    if (!clientId || clientId === 'demo_client_id' || clientId === 'your_uaepass_client_id' || clientId === 'undefined') {
       const state = crypto.randomBytes(32).toString('hex');
       // Return a demo URL that goes to our callback with demo params
       const demoAuthUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/uaepass/callback?code=demo_code_${Date.now()}&state=${state}`;
@@ -129,6 +131,110 @@ export async function refreshToken(req, res) {
     });
   } catch (error) {
     res.status(401).json({ error: 'Invalid refresh token' });
+  }
+}
+
+export async function login(req, res) {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    // Demo mode: simple check for demo/demo
+    if (process.env.NODE_ENV === 'development' && username === 'demo' && password === 'demo') {
+      // Find or create demo user
+      let user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: 'demo@tali.app' },
+            { fullName: 'Demo User' }
+          ]
+        }
+      });
+
+      if (!user) {
+        // Create demo user
+        user = await prisma.user.create({
+          data: {
+            email: 'demo@tali.app',
+            fullName: 'Demo User',
+            phoneNumber: '+971501234567',
+            passwordHash: await bcrypt.hash('demo', 10),
+            status: 'active',
+            emailVerified: true,
+          }
+        });
+      }
+
+      // Generate JWT tokens
+      const { accessToken, refreshToken } = uaePassService.generateJWT(user);
+
+      // Update last login
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() }
+      });
+
+      return res.json({
+        success: true,
+        accessToken,
+        refreshToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.fullName,
+          phoneNumber: user.phoneNumber,
+          preferredLanguage: user.preferredLanguage,
+        }
+      });
+    }
+
+    // Production: find user by email or username
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: username },
+          { fullName: username }
+        ],
+        status: 'active'
+      }
+    });
+
+    if (!user || !user.passwordHash) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    // Generate JWT tokens
+    const { accessToken, refreshToken } = uaePassService.generateJWT(user);
+
+    // Update last login
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() }
+    });
+
+    res.json({
+      success: true,
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        phoneNumber: user.phoneNumber,
+        preferredLanguage: user.preferredLanguage,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 }
 

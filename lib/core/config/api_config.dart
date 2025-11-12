@@ -6,6 +6,7 @@ class ApiConfig {
   );
 
   // Auth endpoints
+  static const String login = '/auth/login';
   static const String uaePassLogin = '/auth/uae-pass/login';
   static const String uaePassCallback = '/auth/uae-pass/callback';
   static const String refreshToken = '/auth/refresh-token';
