@@ -14,7 +14,6 @@ import Loyalty from './features/loyalty/pages/Loyalty';
 import LoyaltyDetail from './features/loyalty/pages/LoyaltyDetail';
 import Analytics from './features/analytics/pages/Analytics';
 import Settings from './features/settings/pages/Settings';
-import Upload from './features/statements/pages/Upload';
 
 // Shared components
 import PrivateRoute from './shared/components/PrivateRoute';
@@ -49,7 +48,6 @@ function App() {
             <Route path="loyalty/:id" element={<LoyaltyDetail />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="settings" element={<Settings />} />
-            <Route path="upload" element={<Upload />} />
           </Route>
 
           {/* Fallback */}

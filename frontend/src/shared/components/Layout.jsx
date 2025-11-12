@@ -7,7 +7,6 @@ import {
   RefreshCcw,
   Gift,
   TrendingUp,
-  Upload,
   Settings,
   Bell,
   LogOut,
@@ -31,7 +30,6 @@ const Layout = () => {
     { path: '/subscriptions', label: 'Subscriptions', icon: RefreshCcw },
     { path: '/loyalty', label: 'Loyalty', icon: Gift },
     { path: '/analytics', label: 'Analytics', icon: TrendingUp },
-    { path: '/upload', label: 'Upload', icon: Upload },
     { path: '/settings', label: 'Settings', icon: Settings },
   ];
 

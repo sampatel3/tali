@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { transactionsAPI } from '../../../shared/services/api';
+import React, { useState, useEffect, useRef } from 'react';
+import { transactionsAPI, uploadAPI } from '../../../shared/services/api';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -7,6 +7,8 @@ const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const [filters, setFilters] = useState({
     searchQuery: '',
     category: '',
@@ -38,6 +40,71 @@ const Transactions = () => {
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleUpload(file);
+    }
+  };
+
+  const handleUpload = async (file) => {
+    if (!file) return;
+
+    setUploading(true);
+    
+    try {
+      const { data } = await uploadAPI.uploadStatement(file);
+      toast.success('Statement uploaded! Processing...');
+      
+      // Poll for processing status
+      const statementId = data.statement.id;
+      let attempts = 0;
+      const maxAttempts = 60; // 60 seconds max wait
+      
+      const checkStatus = setInterval(async () => {
+        attempts++;
+        try {
+          const statusData = await uploadAPI.getStatementStatus(statementId);
+          
+          if (statusData.status === 'completed') {
+            clearInterval(checkStatus);
+            const count = statusData.transactionCount || 0;
+            if (count > 0) {
+              toast.success(`✅ ${count} transactions imported successfully!`);
+            } else {
+              toast.warning('Statement processed but no transactions found. Check file format.');
+            }
+            setUploading(false);
+            // Refresh transactions
+            await fetchTransactions();
+          } else if (statusData.status === 'failed') {
+            clearInterval(checkStatus);
+            toast.error(`Processing failed: ${statusData.errorMessage || 'Unknown error'}`);
+            setUploading(false);
+          } else if (attempts >= maxAttempts) {
+            clearInterval(checkStatus);
+            toast.warning('Processing is taking longer than expected. Transactions will appear when ready.');
+            setUploading(false);
+            // Still refresh in case it completed
+            await fetchTransactions();
+          }
+        } catch (err) {
+          console.error('Error checking status:', err);
+          if (attempts >= maxAttempts) {
+            clearInterval(checkStatus);
+            setUploading(false);
+            await fetchTransactions();
+          }
+        }
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error(error.response?.data?.error || 'Upload failed. Please try again.');
+      setUploading(false);
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -86,6 +153,32 @@ const Transactions = () => {
         <div>
           <h1 className="text-4xl font-bold text-gray-900">💰 Transactions</h1>
           <p className="text-gray-600 mt-2">Track every dirham that comes in and goes out</p>
+        </div>
+        <div className="flex gap-3">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept=".pdf,.csv"
+            className="hidden"
+            id="statement-upload"
+          />
+          <label
+            htmlFor="statement-upload"
+            className={`btn-primary cursor-pointer ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {uploading ? (
+              <>
+                <span className="animate-spin mr-2">⏳</span>
+                Processing...
+              </>
+            ) : (
+              <>
+                <span className="mr-2">📤</span>
+                Upload Statement
+              </>
+            )}
+          </label>
         </div>
       </div>
 
@@ -210,12 +303,24 @@ const Transactions = () => {
             <div className="text-8xl mb-6 animate-bounce-subtle">📭</div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3">No Transactions Found</h3>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Upload a bank statement to automatically import and track all your transactions
+              Upload a bank statement (PDF or CSV) to automatically import and track all your transactions
             </p>
-            <a href="/upload" className="btn-primary">
-              <span className="mr-2">📤</span>
-              Upload Statement
-            </a>
+            <label
+              htmlFor="statement-upload"
+              className={`btn-primary inline-block cursor-pointer ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {uploading ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <span className="mr-2">📤</span>
+                  Upload Statement
+                </>
+              )}
+            </label>
           </div>
         ) : (
           <div className="space-y-2">
