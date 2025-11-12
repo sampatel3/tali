@@ -1,5 +1,4 @@
 import Bull from 'bull';
-import { redis } from '../../server.js';
 
 // Create queues
 export const transactionSyncQueue = new Bull('transaction-sync', {

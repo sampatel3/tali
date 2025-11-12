@@ -133,6 +133,13 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
+// Start workers in development
+if (process.env.NODE_ENV !== 'production') {
+  import('./workers/index.js').catch(err => {
+    logger.warn('Failed to start workers:', err.message);
+  });
+}
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -1,4 +1,4 @@
-import { statementProcessingQueue } from '../../../shared/services/queueService.js';
+import { statementProcessingQueue } from '../../../services/jobs/queueService.js';
 import { prisma } from '../../../server.js';
 import { parseStatement } from '../services/statementParser.js';
 import { categorizeTransaction, generateTransactionHash, validateTransaction } from '../../../shared/utils/helpers.js';
@@ -23,11 +23,34 @@ statementProcessingQueue.process(async (job) => {
 
     // Parse the statement
     job.progress(10);
-    const parseResult = await parseStatement(filepath, mimeType);
-    console.log(`Parsed ${parseResult.totalCount} transactions from ${parseResult.bankName}`);
+    let parseResult;
+    try {
+      parseResult = await parseStatement(filepath, mimeType);
+      console.log(`Parsed ${parseResult.totalCount} transactions from ${parseResult.bankName}`);
+    } catch (parseError) {
+      console.error('Statement parsing error:', parseError);
+      await prisma.bankStatement.update({
+        where: { id: statementId },
+        data: {
+          status: 'failed',
+          errorMessage: `Parsing failed: ${parseError.message}`,
+        },
+      });
+      throw parseError;
+    }
 
     if (parseResult.totalCount === 0) {
-      throw new Error('No transactions found in statement');
+      // Update status but don't fail completely - user can still see the statement
+      await prisma.bankStatement.update({
+        where: { id: statementId },
+        data: {
+          status: 'completed',
+          transactionCount: 0,
+          errorMessage: 'No transactions found in statement. PDF parsing may need manual review.',
+        },
+      });
+      console.warn(`No transactions found in statement ${statementId}`);
+      return; // Exit early but don't throw error
     }
 
     // Get or create bank account
