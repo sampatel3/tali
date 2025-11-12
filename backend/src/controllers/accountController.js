@@ -1,5 +1,5 @@
 import { prisma } from '../server.js';
-import * as nebrasService from '../services/banking/nebrasService.js';
+import * as nebrasService from '../features/banking/services/nebrasService.js';
 import { addJob } from '../services/jobs/queueService.js';
 
 export async function createLinkToken(req, res) {

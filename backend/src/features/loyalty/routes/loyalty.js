@@ -9,7 +9,7 @@ import {
   getLoyaltyTransactions,
   syncLoyaltyCard,
   getSuggestions
-} from '../controllers/loyaltyController.js';
+} from '../../../controllers/loyaltyController.js';
 
 const router = express.Router();
 

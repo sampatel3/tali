@@ -5,7 +5,7 @@ import {
   getAccounts,
   syncAccount,
   deleteAccount
-} from '../controllers/accountController.js';
+} from '../../../controllers/accountController.js';
 
 const router = express.Router();
 

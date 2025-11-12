@@ -23,7 +23,7 @@ import notificationRoutes from './features/notifications/routes/notifications.js
 import userRoutes from './features/users/routes/users.js';
 
 // Import middleware from shared
-import { authenticate } from './features/auth/middleware/auth.js';
+import { authenticate } from './middleware/auth.js';
 import { errorHandler } from './shared/middleware/errorHandler.js';
 
 const app = express();

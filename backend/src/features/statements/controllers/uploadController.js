@@ -1,7 +1,7 @@
 import multer from 'multer';
 import path from 'path';
 import { prisma } from '../../../server.js';
-import { addJob } from '../../../shared/services/queueService.js';
+import { addJob } from '../../../services/jobs/queueService.js';
 import fs from 'fs';
 
 // Ensure upload directory exists

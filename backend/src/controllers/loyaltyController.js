@@ -1,5 +1,5 @@
 import { prisma } from '../server.js';
-import * as loyaltyService from '../services/loyalty/loyaltyService.js';
+import * as loyaltyService from '../features/loyalty/services/loyaltyService.js';
 
 export async function getLoyaltyPrograms(req, res) {
   try {
