@@ -80,28 +80,43 @@ const Transactions = () => {
   };
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Transactions</h1>
-        <p className="text-gray-600">All your spending in one place</p>
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900">💰 Transactions</h1>
+          <p className="text-gray-600 mt-2">Track every dirham that comes in and goes out</p>
+        </div>
       </div>
 
       {/* Stats Summary */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card">
-            <div className="text-sm text-gray-600 mb-1">Total Transactions</div>
-            <div className="text-3xl font-bold text-primary-600">{stats.count}</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="stat-card-primary">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-3xl">📊</span>
+              <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded-lg">Count</span>
+            </div>
+            <div className="text-sm font-medium opacity-90 mb-1">Total Transactions</div>
+            <div className="text-3xl font-bold">{stats.count}</div>
           </div>
-          <div className="card">
-            <div className="text-sm text-gray-600 mb-1">Total Amount</div>
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-3xl">💵</span>
+              <span className="badge badge-primary">Total</span>
+            </div>
+            <div className="text-sm font-medium text-gray-600 mb-1">Total Amount</div>
             <div className="text-3xl font-bold text-gray-900">
               {formatCurrency(stats.totalAmount)}
             </div>
           </div>
-          <div className="card">
-            <div className="text-sm text-gray-600 mb-1">Average Transaction</div>
-            <div className="text-3xl font-bold text-gray-700">
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-3xl">📈</span>
+              <span className="badge badge-accent">Average</span>
+            </div>
+            <div className="text-sm font-medium text-gray-600 mb-1">Average Transaction</div>
+            <div className="text-3xl font-bold text-gray-900">
               {formatCurrency(stats.count > 0 ? stats.totalAmount / stats.count : 0)}
             </div>
           </div>
@@ -109,47 +124,48 @@ const Transactions = () => {
       )}
 
       {/* Filters */}
-      <div className="card mb-6">
+      <div className="card-elevated">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">🔍 Filters</h2>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <input
             type="text"
             placeholder="Search merchant..."
-            className="input"
+            className="input-field"
             value={filters.searchQuery}
             onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
           />
 
           <select
-            className="input"
+            className="input-field"
             value={filters.category}
             onChange={(e) => handleFilterChange('category', e.target.value)}
           >
             <option value="">All Categories</option>
-            <option value="food_dining">Food & Dining</option>
-            <option value="entertainment">Entertainment</option>
-            <option value="shopping">Shopping</option>
-            <option value="transportation">Transportation</option>
-            <option value="utilities">Utilities</option>
-            <option value="fitness">Fitness</option>
-            <option value="health">Health</option>
-            <option value="education">Education</option>
-            <option value="financial">Financial</option>
-            <option value="other">Other</option>
+            <option value="food_dining">🍽️ Food & Dining</option>
+            <option value="entertainment">🎬 Entertainment</option>
+            <option value="shopping">🛍️ Shopping</option>
+            <option value="transportation">🚗 Transportation</option>
+            <option value="utilities">⚡ Utilities</option>
+            <option value="fitness">💪 Fitness</option>
+            <option value="health">🏥 Health</option>
+            <option value="education">📚 Education</option>
+            <option value="financial">💳 Financial</option>
+            <option value="other">📌 Other</option>
           </select>
 
           <select
-            className="input"
+            className="input-field"
             value={filters.type}
             onChange={(e) => handleFilterChange('type', e.target.value)}
           >
             <option value="">All Types</option>
-            <option value="debit">Debit</option>
-            <option value="credit">Credit</option>
+            <option value="debit">Debit (-)</option>
+            <option value="credit">Credit (+)</option>
           </select>
 
           <input
             type="date"
-            className="input"
+            className="input-field"
             value={filters.startDate}
             onChange={(e) => handleFilterChange('startDate', e.target.value)}
             placeholder="Start Date"
@@ -157,7 +173,7 @@ const Transactions = () => {
 
           <input
             type="date"
-            className="input"
+            className="input-field"
             value={filters.endDate}
             onChange={(e) => handleFilterChange('endDate', e.target.value)}
             placeholder="End Date"
@@ -173,54 +189,58 @@ const Transactions = () => {
               startDate: '',
               endDate: '',
             })}
-            className="mt-4 text-sm text-primary-600 hover:text-primary-700"
+            className="mt-4 btn-secondary text-sm"
           >
-            Clear Filters
+            ✕ Clear Filters
           </button>
         )}
       </div>
 
       {/* Transactions List */}
-      <div className="card">
+      <div className="card-elevated">
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading transactions...</p>
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="w-16 h-16 spinner mx-auto mb-4"></div>
+              <p className="text-gray-500">Loading transactions...</p>
+            </div>
           </div>
         ) : transactions.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">📭</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Transactions Found</h3>
-            <p className="text-gray-600 mb-6">
-              Upload a bank statement to see your transactions here
+          <div className="text-center py-16">
+            <div className="text-8xl mb-6 animate-bounce-subtle">📭</div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">No Transactions Found</h3>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              Upload a bank statement to automatically import and track all your transactions
             </p>
             <a href="/upload" className="btn-primary">
+              <span className="mr-2">📤</span>
               Upload Statement
             </a>
           </div>
         ) : (
-          <div className="space-y-3">
-            {transactions.map((txn) => (
+          <div className="space-y-2">
+            {transactions.map((txn, idx) => (
               <div
                 key={txn.id}
-                className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg border border-gray-100 transition"
+                className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-xl border border-gray-100 transition-all duration-200 group animate-fade-in"
+                style={{ animationDelay: `${0.03 * idx}s` }}
               >
-                <div className="flex items-center space-x-4 flex-1">
-                  <div className="text-3xl">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
                     {getCategoryIcon(txn.category)}
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold text-gray-900">
                         {txn.merchantName || 'Unknown Merchant'}
                       </h3>
                       {txn.subscription && (
-                        <span className="px-2 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded-full">
+                        <span className="badge badge-primary">
                           Subscription
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center space-x-3 mt-1">
+                    <div className="flex items-center gap-3 mt-1 flex-wrap">
                       <p className="text-sm text-gray-600">
                         {format(new Date(txn.date), 'MMM dd, yyyy')}
                       </p>
@@ -231,23 +251,23 @@ const Transactions = () => {
                         </p>
                       )}
                       {txn.category && (
-                        <span className={`px-2 py-0.5 text-xs font-medium rounded ${getCategoryColor(txn.category)}`}>
+                        <span className={`badge ${getCategoryColor(txn.category)}`}>
                           {txn.category.replace('_', ' ')}
                         </span>
                       )}
                     </div>
                     {txn.description && txn.description !== txn.merchantName && (
-                      <p className="text-xs text-gray-500 mt-1">{txn.description}</p>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-1">{txn.description}</p>
                     )}
                   </div>
                 </div>
                 <div className="text-right ml-4">
-                  <div className={`text-lg font-bold ${txn.type === 'credit' ? 'text-green-600' : 'text-gray-900'}`}>
+                  <div className={`text-xl font-bold ${txn.type === 'credit' ? 'text-success-600' : 'text-gray-900'}`}>
                     {txn.type === 'credit' && '+'}
                     {formatCurrency(txn.amount)}
                   </div>
                   {txn.balance && (
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 mt-1">
                       Balance: {formatCurrency(txn.balance)}
                     </div>
                   )}
