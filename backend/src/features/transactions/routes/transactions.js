@@ -54,7 +54,7 @@ router.get('/', async (req, res) => {
           select: {
             id: true,
             accountName: true,
-            bankName: true,
+            institutionName: true,
             mask: true
           }
         },

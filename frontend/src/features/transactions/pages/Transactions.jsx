@@ -40,6 +40,8 @@ const Transactions = () => {
 
   useEffect(() => {
     fetchTransactions();
+    // Clear uploading state on mount in case it was stuck
+    setUploading(false);
   }, [filters]);
 
   const fetchTransactions = async () => {
@@ -384,7 +386,7 @@ const Transactions = () => {
                       </p>
                       {txn.bankAccount && (
                         <p className="text-sm text-gray-500">
-                          {txn.bankAccount.bankName || txn.bankAccount.accountName}
+                          {txn.bankAccount.institutionName || txn.bankAccount.accountName}
                           {txn.bankAccount.mask && ` •••• ${txn.bankAccount.mask}`}
                         </p>
                       )}

@@ -62,8 +62,7 @@ export async function getSubscription(req, res) {
       where: { id, userId },
       include: {
         transactions: {
-          orderBy: { transactionDate: 'desc' },
-          take: 10
+          orderBy: { date: 'desc' }
         }
       }
     });
@@ -72,7 +71,23 @@ export async function getSubscription(req, res) {
       return res.status(404).json({ error: 'Subscription not found' });
     }
 
-    res.json(subscription);
+    // Calculate statistics
+    const transactions = subscription.transactions || [];
+    const totalPaid = transactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const averageAmount = transactions.length > 0 ? totalPaid / transactions.length : 0;
+    const firstPayment = transactions.length > 0 ? transactions[transactions.length - 1].date : null;
+    const lastPayment = transactions.length > 0 ? transactions[0].date : null;
+
+    res.json({
+      ...subscription,
+      stats: {
+        totalPaid,
+        averageAmount,
+        paymentCount: transactions.length,
+        firstPayment,
+        lastPayment
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -171,48 +186,49 @@ export async function detectSubscriptions(req, res) {
   try {
     const userId = req.user.userId;
 
-    // Get recent transactions
+    // Get transactions (prioritize recent ones but include all for better detection)
     const transactions = await prisma.transaction.findMany({
       where: {
         userId,
-        isSubscription: false,
-        transactionDate: {
-          gte: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000) // Last 6 months
-        }
+        isSubscription: false
       },
-      orderBy: { transactionDate: 'desc' },
-      take: 500
+      orderBy: { date: 'desc' },
+      take: 1000 // Increased limit to catch more subscriptions
     });
 
     const detectedSubscriptions = [];
 
-    // Process each transaction through ML service
-    for (const transaction of transactions) {
-      try {
-        // Get transaction history for the same merchant
-        const history = await prisma.transaction.findMany({
-          where: {
-            userId,
-            merchantName: transaction.merchantName,
-            transactionDate: {
-              lt: transaction.transactionDate
-            }
-          },
-          orderBy: { transactionDate: 'desc' },
-          take: 12
-        });
+    // Group transactions by merchant for efficient processing
+    const merchantGroups = {};
+    for (const txn of transactions) {
+      const key = txn.merchantName.toUpperCase();
+      if (!merchantGroups[key]) {
+        merchantGroups[key] = [];
+      }
+      merchantGroups[key].push(txn);
+    }
 
+    // Process each merchant group
+    for (const [merchant, txnGroup] of Object.entries(merchantGroups)) {
+      // Sort by date
+      const sorted = txnGroup.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      // Use the most recent transaction
+      const latest = sorted[sorted.length - 1];
+      const history = sorted.slice(0, -1);
+
+      try {
         // Call ML service
         const mlResponse = await axios.post(`${ML_SERVICE_URL}/detect`, {
           transaction: {
-            merchant_name: transaction.merchantName,
-            amount: parseFloat(transaction.amount),
-            date: transaction.transactionDate.toISOString()
+            merchant_name: latest.merchantName,
+            amount: parseFloat(latest.amount),
+            date: latest.date.toISOString()
           },
           history: history.map(t => ({
             merchant_name: t.merchantName,
             amount: parseFloat(t.amount),
-            date: t.transactionDate.toISOString()
+            date: t.date.toISOString()
           }))
         }, {
           timeout: 5000
@@ -223,8 +239,8 @@ export async function detectSubscriptions(req, res) {
           const existing = await prisma.subscription.findFirst({
             where: {
               userId,
-              merchantName: transaction.merchantName,
-              status: 'active'
+              merchantName: latest.merchantName,
+              status: { in: ['active', 'paused'] }
             }
           });
 
@@ -232,26 +248,30 @@ export async function detectSubscriptions(req, res) {
             const subscription = await prisma.subscription.create({
               data: {
                 userId,
-                merchantName: transaction.merchantName,
-                amount: transaction.amount,
-                currency: transaction.currency,
+                merchantName: latest.merchantName,
+                amount: latest.amount,
+                currency: latest.currency || 'AED',
                 billingFrequency: mlResponse.data.frequency,
                 category: mlResponse.data.category,
                 subcategory: mlResponse.data.subcategory,
                 nextChargeDate: mlResponse.data.next_charge_date ? new Date(mlResponse.data.next_charge_date) : null,
                 detectionConfidence: mlResponse.data.confidence,
-                firstChargeDate: transaction.transactionDate,
-                lastChargeDate: transaction.transactionDate,
+                firstChargeDate: sorted[0]?.date || latest.date,
+                lastChargeDate: latest.date,
                 status: 'active',
-                isManual: false
+                isManual: false,
+                transactionCount: txnGroup.length
               }
             });
 
             detectedSubscriptions.push(subscription);
 
-            // Mark transaction as subscription
-            await prisma.transaction.update({
-              where: { id: transaction.id },
+            // Mark all transactions for this merchant as subscriptions
+            await prisma.transaction.updateMany({
+              where: {
+                id: { in: txnGroup.map(t => t.id) },
+                isSubscription: false
+              },
               data: {
                 isSubscription: true,
                 subscriptionId: subscription.id
@@ -260,7 +280,7 @@ export async function detectSubscriptions(req, res) {
           }
         }
       } catch (error) {
-        console.error(`Error processing transaction ${transaction.id}:`, error.message);
+        console.error(`Error detecting subscription for ${merchant}:`, error.message);
       }
     }
 

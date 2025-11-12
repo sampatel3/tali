@@ -290,6 +290,7 @@ async function detectSubscriptions(transactions, userId) {
               detectionConfidence: detection.confidence,
               category: detection.category,
               subcategory: detection.subcategory,
+              transactionCount: txnGroup.length,
             },
           });
           subscriptions.push(existing);
@@ -306,11 +307,12 @@ async function detectSubscriptions(transactions, userId) {
                 ? new Date(detection.next_charge_date)
                 : null,
               lastChargeDate: latest.date,
+              firstChargeDate: latest.date,
               status: 'active',
               detectionConfidence: detection.confidence,
-              detectionMethod: 'ml_service',
               category: detection.category,
               subcategory: detection.subcategory,
+              transactionCount: txnGroup.length,
             },
           });
           subscriptions.push(subscription);
