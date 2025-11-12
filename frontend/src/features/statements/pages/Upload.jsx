@@ -19,11 +19,46 @@ const Upload = () => {
     setUploading(true);
     try {
       const { data } = await uploadAPI.uploadStatement(file);
-      toast.success('Statement uploaded successfully!');
-      setFile(null);
+      toast.success('Statement uploaded successfully! Processing...');
+      
+      // Poll for processing status
+      const statementId = data.statement.id;
+      let attempts = 0;
+      const maxAttempts = 30; // 30 seconds max wait
+      
+      const checkStatus = setInterval(async () => {
+        attempts++;
+        try {
+          const statusData = await uploadAPI.getStatementStatus(statementId);
+          
+          if (statusData.status === 'completed') {
+            clearInterval(checkStatus);
+            toast.success(`Processing complete! ${statusData.transactionCount || 0} transactions extracted.`);
+            setFile(null);
+            setUploading(false);
+            // Optionally refresh transactions list
+            window.location.reload();
+          } else if (statusData.status === 'failed') {
+            clearInterval(checkStatus);
+            toast.error(`Processing failed: ${statusData.errorMessage || 'Unknown error'}`);
+            setUploading(false);
+          } else if (attempts >= maxAttempts) {
+            clearInterval(checkStatus);
+            toast.warning('Processing is taking longer than expected. Check back later.');
+            setUploading(false);
+          }
+        } catch (err) {
+          console.error('Error checking status:', err);
+          if (attempts >= maxAttempts) {
+            clearInterval(checkStatus);
+            setUploading(false);
+          }
+        }
+      }, 1000); // Check every second
+      
     } catch (error) {
-      toast.error('Upload failed');
-    } finally {
+      console.error('Upload error:', error);
+      toast.error(error.response?.data?.error || 'Upload failed. Please try again.');
       setUploading(false);
     }
   };

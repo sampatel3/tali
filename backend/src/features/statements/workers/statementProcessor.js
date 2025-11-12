@@ -3,8 +3,18 @@ import { prisma } from '../../../server.js';
 import { parseStatement } from '../services/statementParser.js';
 import { categorizeTransaction, generateTransactionHash, validateTransaction } from '../../../shared/utils/helpers.js';
 import axios from 'axios';
+import fs from 'fs';
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
+
+// Ensure upload directory exists (same as controller)
+const uploadDir = process.env.UPLOAD_DIR || process.env.NODE_ENV === 'production' 
+  ? '/app/uploads/statements' 
+  : 'uploads/statements';
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 /**
  * Process uploaded bank statement
@@ -123,24 +133,25 @@ statementProcessingQueue.process(async (job) => {
  * Get or create bank account for user
  */
 async function getOrCreateBankAccount(userId, bankName) {
-  // Try to find existing account
+  // Try to find existing account by institution name
   let account = await prisma.bankAccount.findFirst({
     where: {
       userId,
-      bankName,
+      institutionName: bankName,
     },
   });
 
   if (!account) {
-    // Create new account
+    // Create new account with required fields
     account = await prisma.bankAccount.create({
       data: {
         userId,
-        bankName,
+        institutionName: bankName,
+        accountId: `manual_${Date.now()}`, // Required field
+        accountName: `${bankName} Account`,
         accountType: 'checking',
         currency: 'AED',
-        status: 'active',
-        linkedVia: 'manual_upload',
+        isActive: true,
       },
     });
   }

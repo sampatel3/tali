@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: tali-postgres-prod
+    environment:
+      POSTGRES_DB: ${DB_NAME:-tali}
+      POSTGRES_USER: ${DB_USER:-taliuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-taliuser} -d ${DB_NAME:-tali}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tali-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: tali-redis-prod
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tali-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tali-backend-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - API_URL=${API_URL}
+      - ML_SERVICE_URL=http://ml-service:8000
+      - UPLOAD_DIR=/app/uploads/statements
+      - UAE_PASS_CLIENT_ID=${UAE_PASS_CLIENT_ID}
+      - UAE_PASS_CLIENT_SECRET=${UAE_PASS_CLIENT_SECRET}
+      - UAE_PASS_REDIRECT_URI=${UAE_PASS_REDIRECT_URI}
+      - UAE_PASS_ENV=production
+      - NEBRAS_API_KEY=${NEBRAS_API_KEY}
+      - NEBRAS_API_URL=${NEBRAS_API_URL}
+      - LOG_LEVEL=warn
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend/uploads:/app/uploads
+    command: npm start
+    networks:
+      - tali-network
+    restart: unless-stopped
+
+  backend-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tali-backend-worker-prod
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ML_SERVICE_URL=http://ml-service:8000
+      - UPLOAD_DIR=/app/uploads/statements
+      - LOG_LEVEL=warn
+    depends_on:
+      - backend
+      - redis
+    volumes:
+      - ./backend/uploads:/app/uploads
+    command: npm run worker
+    networks:
+      - tali-network
+    restart: unless-stopped
+
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: tali-ml-service-prod
+    networks:
+      - tali-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tali-frontend-prod
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=${API_URL}/api/v1
+    networks:
+      - tali-network
+    restart: unless-stopped
+
+networks:
+  tali-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+

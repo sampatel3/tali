@@ -55,6 +55,7 @@ services:
       - FRONTEND_URL=http://localhost:5173
       - API_URL=http://localhost:3000
       - ML_SERVICE_URL=http://ml-service:8000
+      - UPLOAD_DIR=uploads/statements
       - UAE_PASS_CLIENT_ID=${UAE_PASS_CLIENT_ID:-}
       - UAE_PASS_CLIENT_SECRET=${UAE_PASS_CLIENT_SECRET:-}
       - UAE_PASS_REDIRECT_URI=${UAE_PASS_REDIRECT_URI:-http://localhost:5173/auth/uaepass/callback}

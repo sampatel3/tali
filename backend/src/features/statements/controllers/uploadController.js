@@ -4,8 +4,11 @@ import { prisma } from '../../../server.js';
 import { addJob } from '../../../services/jobs/queueService.js';
 import fs from 'fs';
 
-// Ensure upload directory exists
-const uploadDir = 'uploads/statements';
+// Ensure upload directory exists (configurable for production/local)
+const uploadDir = process.env.UPLOAD_DIR || process.env.NODE_ENV === 'production' 
+  ? '/app/uploads/statements' 
+  : 'uploads/statements';
+
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
