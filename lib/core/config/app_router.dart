@@ -9,6 +9,7 @@ import '../../features/settings/screens/settings_screen.dart';
 import '../../features/settings/screens/uae_services_screen.dart';
 import '../../features/settings/screens/bank_accounts_screen.dart';
 import '../../features/settings/screens/upload_statement_screen.dart';
+import '../../features/debug/debug_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -55,6 +56,11 @@ class AppRouter {
         path: '/transactions',
         name: 'transactions',
         builder: (context, state) => const TransactionsScreen(),
+      ),
+      GoRoute(
+        path: '/debug',
+        name: 'debug',
+        builder: (context, state) => const DebugScreen(),
       ),
       GoRoute(
         path: '/settings',

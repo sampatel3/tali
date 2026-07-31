@@ -46,21 +46,37 @@ class SubscriptionModel extends Equatable {
   });
 
   factory SubscriptionModel.fromJson(Map<String, dynamic> json) {
+    // Handle amount as string or number
+    double parseAmount(dynamic value) {
+      if (value is num) return value.toDouble();
+      if (value is String) return double.parse(value);
+      throw Exception('Invalid amount type: ${value.runtimeType}');
+    }
+    
+    // Handle totalPaid as string or number
+    double? parseTotalPaid(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toDouble();
+      if (value is String) return double.parse(value);
+      return null;
+    }
+    
     return SubscriptionModel(
       id: json['id'] as String,
       userId: json['userId'] as String,
       merchantName: json['merchantName'] as String,
       description: json['description'] as String?,
-      amount: (json['amount'] as num).toDouble(),
+      amount: parseAmount(json['amount']),
       currency: json['currency'] as String? ?? 'AED',
       billingFrequency: json['billingFrequency'] as String,
-      nextChargeDate: DateTime.parse(json['nextChargeDate']),
+      nextChargeDate: DateTime.parse(json['nextChargeDate'] as String),
       lastChargeDate: json['lastChargeDate'] != null
-          ? DateTime.parse(json['lastChargeDate'])
+          ? DateTime.parse(json['lastChargeDate'] as String)
           : null,
-      startDate: DateTime.parse(json['startDate']),
-      endDate:
-          json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
+      startDate: DateTime.parse(json['startDate'] as String),
+      endDate: json['endDate'] != null 
+          ? DateTime.parse(json['endDate'] as String) 
+          : null,
       status: json['status'] as String? ?? 'active',
       category: json['category'] as String? ?? 'other',
       subcategory: json['subcategory'] as String?,
@@ -68,13 +84,13 @@ class SubscriptionModel extends Equatable {
       autoRenew: json['autoRenew'] as bool? ?? true,
       transactionCount: json['_count']?['transactions'] as int?,
       totalPaid: json['stats']?['totalPaid'] != null
-          ? (json['stats']['totalPaid'] as num).toDouble()
+          ? parseTotalPaid(json['stats']['totalPaid'])
           : null,
       createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
+          ? DateTime.parse(json['createdAt'] as String)
           : null,
       updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
+          ? DateTime.parse(json['updatedAt'] as String)
           : null,
     );
   }

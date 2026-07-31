@@ -18,19 +18,29 @@ class SubscriptionProvider with ChangeNotifier {
   // Load subscriptions
   Future<void> loadSubscriptions({String? status}) async {
     try {
+      print('🔄 SubscriptionProvider.loadSubscriptions() called');
       _isLoading = true;
       _error = null;
       notifyListeners();
 
+      print('📞 Calling _service.getSubscriptions()...');
       final result = await _service.getSubscriptions(status: status);
+      print('✅ Service returned: ${result.keys}');
+      
       _subscriptions = result['subscriptions'] as List<SubscriptionModel>;
       _totals = result['totals'] as Map<String, dynamic>?;
+      
+      print('✅ Parsed ${_subscriptions.length} subscriptions');
+      print('✅ Totals: $_totals');
 
       _isLoading = false;
       notifyListeners();
+      print('✅ Notified listeners with ${_subscriptions.length} subscriptions');
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
+      print('❌ Error loading subscriptions: $e');
+      print('❌ Stack trace: ${StackTrace.current}');
       notifyListeners();
     }
   }

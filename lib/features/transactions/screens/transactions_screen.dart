@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../providers/transaction_provider.dart';
@@ -88,8 +89,28 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           Expanded(
             child: Consumer<TransactionProvider>(
               builder: (context, provider, _) {
+                print('🔄 TransactionsScreen Consumer rebuild - isLoading: ${provider.isLoading}, count: ${provider.transactions.length}, error: ${provider.error}');
+                
                 if (provider.isLoading) {
                   return const Center(child: CircularProgressIndicator());
+                }
+                
+                if (provider.error != null) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error_outline, size: 64, color: AppTheme.error),
+                        const SizedBox(height: 16),
+                        Text('Error: ${provider.error}'),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => provider.loadTransactions(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
                 }
 
                 var transactions = provider.transactions;
@@ -251,6 +272,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         type: FileType.custom,
         allowedExtensions: ['pdf', 'csv'],
         allowMultiple: false,
+        withData: kIsWeb, // On web, we need bytes, so request data
       );
 
       if (result == null) {
@@ -273,27 +295,43 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
       // Upload file - handle web (bytes) and mobile (path) differently
       Map<String, dynamic> uploadResult;
-      if (file.path != null) {
-        // Mobile: use file path
-        uploadResult = await _uploadService.uploadStatement(file.path!);
-      } else if (file.bytes != null) {
+      
+      // On web, always use bytes (path is not available)
+      if (kIsWeb) {
+        if (file.bytes == null) {
+          setState(() {
+            _isUploading = false;
+          });
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('❌ Could not read file bytes'),
+              backgroundColor: AppTheme.error,
+            ),
+          );
+          return;
+        }
         // Web: use bytes
         uploadResult = await _uploadService.uploadStatement(
           file.bytes!,
           filename: file.name,
         );
       } else {
-        setState(() {
-          _isUploading = false;
-        });
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Could not read file'),
-            backgroundColor: AppTheme.error,
-          ),
-        );
-        return;
+        // Mobile: use file path
+        if (file.path == null) {
+          setState(() {
+            _isUploading = false;
+          });
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('❌ Could not read file path'),
+              backgroundColor: AppTheme.error,
+            ),
+          );
+          return;
+        }
+        uploadResult = await _uploadService.uploadStatement(file.path!);
       }
       final statementId = uploadResult['statement']['id'] as String;
 

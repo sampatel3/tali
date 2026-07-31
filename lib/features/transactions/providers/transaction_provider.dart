@@ -21,22 +21,35 @@ class TransactionProvider with ChangeNotifier {
     DateTime? endDate,
   }) async {
     try {
+      print('🔄 TransactionProvider.loadTransactions() called');
       _isLoading = true;
       _error = null;
       notifyListeners();
 
-      _transactions = await _service.getTransactions(
+      print('📞 Calling _service.getTransactions()...');
+      print('📞 Parameters: category=$category, type=$type, startDate=$startDate, endDate=$endDate');
+      
+      final result = await _service.getTransactions(
         category: category,
         type: type,
         startDate: startDate,
         endDate: endDate,
       );
+      
+      print('📦 Service returned list with ${result.length} items');
+      print('📦 First transaction (if any): ${result.isNotEmpty ? result[0].merchantName : 'none'}');
+      
+      _transactions = result;
 
+      print('✅ Received ${_transactions.length} transactions from service');
       _isLoading = false;
       notifyListeners();
+      print('✅ Notified listeners with ${_transactions.length} transactions');
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
+      print('❌ Error loading transactions: $e');
+      print('❌ Stack trace: ${StackTrace.current}');
       notifyListeners();
     }
   }

@@ -159,6 +159,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const Divider(height: 1),
 
+            // Developer Section (for debugging)
+            _buildSectionHeader('Developer'),
+            _buildNavigationTile(
+              icon: Icons.bug_report_rounded,
+              title: 'Debug Tools',
+              subtitle: 'Test API and data loading',
+              onTap: () => context.push('/debug'),
+            ),
+            const Divider(height: 1),
+
             // Support Section
             _buildSectionHeader('Support'),
             _buildNavigationTile(

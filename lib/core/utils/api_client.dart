@@ -27,12 +27,21 @@ class ApiClient {
         final token = await _storage.read(key: AppConstants.keyAccessToken);
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
+          print('API Request: ${options.method} ${options.path}');
+          print('Token present: ${token.substring(0, 20)}...');
+        } else {
+          print('API Request: ${options.method} ${options.path} - NO TOKEN!');
         }
         return handler.next(options);
       },
       onError: (error, handler) async {
+        print('API Error: ${error.response?.statusCode} - ${error.message}');
+        if (error.response != null) {
+          print('Error response: ${error.response?.data}');
+        }
         // Handle 401 errors and refresh token
         if (error.response?.statusCode == 401) {
+          print('401 Unauthorized - attempting token refresh...');
           try {
             await _refreshToken();
             // Retry the request
@@ -42,6 +51,7 @@ class ApiClient {
             final response = await _dio.fetch(opts);
             return handler.resolve(response);
           } catch (e) {
+            print('Token refresh failed: $e');
             // If refresh fails, clear tokens and redirect to login
             await _storage.delete(key: AppConstants.keyAccessToken);
             await _storage.delete(key: AppConstants.keyRefreshToken);
@@ -49,6 +59,14 @@ class ApiClient {
           }
         }
         return handler.next(error);
+      },
+      onResponse: (response, handler) {
+        print('API Response: ${response.statusCode} ${response.requestOptions.path}');
+        if (response.requestOptions.path.contains('transactions')) {
+          print('Transactions response data keys: ${(response.data as Map).keys}');
+          print('Transactions count: ${(response.data as Map)['transactions']?.length ?? 'null'}');
+        }
+        return handler.next(response);
       },
     ));
   }

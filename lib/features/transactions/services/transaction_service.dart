@@ -14,7 +14,9 @@ class TransactionService {
     int? limit,
   }) async {
     try {
-      final queryParams = <String, dynamic>{};
+      final queryParams = <String, dynamic>{
+        'limit': '1000', // Request more transactions by default
+      };
       if (category != null) queryParams['category'] = category;
       if (type != null) queryParams['type'] = type;
       if (startDate != null) queryParams['startDate'] = startDate.toIso8601String();
@@ -25,9 +27,48 @@ class TransactionService {
           await _apiClient.get(ApiConfig.transactions, queryParameters: queryParams);
 
       final data = response.data as Map<String, dynamic>;
-      final transactions = (data['transactions'] as List)
-          .map((json) => TransactionModel.fromJson(json))
+      
+      // Debug: log response structure
+      print('API Response keys: ${data.keys}');
+      print('Transactions count in response: ${data['transactions']?.length ?? 'null'}');
+      
+      if (data['transactions'] == null) {
+        throw Exception('Invalid response: transactions field missing. Response keys: ${data.keys}');
+      }
+      
+      final transactionsList = data['transactions'] as List;
+      print('Parsing ${transactionsList.length} transactions...');
+      
+      int successCount = 0;
+      int errorCount = 0;
+      final transactions = transactionsList
+          .map((json) {
+            try {
+              final txn = TransactionModel.fromJson(json as Map<String, dynamic>);
+              successCount++;
+              return txn;
+            } catch (e, stackTrace) {
+              // Log parsing errors but continue
+              errorCount++;
+              print('❌ Error parsing transaction: $e');
+              print('❌ Stack: $stackTrace');
+              print('❌ JSON keys: ${(json as Map).keys}');
+              if (json is Map && json.containsKey('amount')) {
+                print('❌ Amount value: ${json['amount']} (type: ${json['amount'].runtimeType})');
+              }
+              if (json is Map && json.containsKey('date')) {
+                print('❌ Date value: ${json['date']} (type: ${json['date'].runtimeType})');
+              }
+              return null;
+            }
+          })
+          .whereType<TransactionModel>()
           .toList();
+      
+      print('✅ Successfully parsed $successCount transactions');
+      if (errorCount > 0) {
+        print('❌ Failed to parse $errorCount transactions');
+      }
 
       return transactions;
     } catch (e) {
